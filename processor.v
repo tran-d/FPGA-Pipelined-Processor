@@ -34,7 +34,7 @@
  * imem.mif and dmem.mif respectively.
  *
  * Importantly, these .mif files should be placed at the top level, i.e. there
- * should be an imem.mif and a dmem.mif at the same level as process.v. You
+ * should be an imem.mif and a dmem.mif at the same level as processor.v. You
  * should figure out how to point your generated imem.v and dmem.v files at
  * these MIF files.
  *
@@ -71,25 +71,53 @@ module processor(
     data_readRegA,                  // I: Data from port A of regfile
     data_readRegB                   // I: Data from port B of regfile
 );
-    // Control signals
-    input clock, reset;
+	// Control signals
+	input clock, reset;
 
-    // Imem
-    output [11:0] address_imem;
-    input [31:0] q_imem;
+	// Imem
+	output [11:0] address_imem;
+	input [31:0] q_imem;
 
-    // Dmem
-    output [11:0] address_dmem;
-    output [31:0] data;
-    output wren;
-    input [31:0] q_dmem;
+	// Dmem
+	output [11:0] address_dmem;
+	output [31:0] data;
+	output wren;
+	input [31:0] q_dmem;
 
-    // Regfile
-    output ctrl_writeEnable;
-    output [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
-    output [31:0] data_writeReg;
-    input [31:0] data_readRegA, data_readRegB;
+	// Regfile
+	output ctrl_writeEnable;
+	output [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
+	output [31:0] data_writeReg;
+	input [31:0] data_readRegA, data_readRegB;
 
-    /* YOUR CODE STARTS HERE */
+	/* YOUR CODE STARTS HERE */
+
+	wire [4:0] opcode, rd, rs, rt, shamt, ALU_op;
+	wire [16:0] immediate;
+	wire [26:0] target;
+	
+	assign opcode 		= q_imem[31:27];
+	assign rd 			= q_imem[26:22];
+	assign rs 			= q_imem[21:17];
+	assign rt 			= q_imem[16:12];
+	assign shamt 		= q_imem[11:7];
+	assign ALU_op 		= q_imem[6:2];
+	assign immediate 	= q_imem[16:0];
+	assign target 		= q_imem[26:0];
+	
+	/******Initialize Register File ******/
+	//	assign ctrl_writeEnable = ???         
+//	assign ctrl_readRegA 	= rs;
+//	assign ctrl_readRegB 	= rt;
+//	assign ctrl_writeReg 	= rd;
+	//	assign data_writeReg = ???
+	
+	/*********** Initialize ALU **********/
+	wire [31:0] ALU_result;
+	wire isNotEqual, isLessThan, overflow;
+	
+	alu my_alu(data_readRegA, data_readRegB, ALU_op, shamt, 
+					ALU_result, isNotEqual, isLessThan, overflow);
+	
 
 endmodule
