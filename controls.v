@@ -1,9 +1,9 @@
 /***************************************************************************************************************/
 
-module controls(opcode, ALU_op, Rwe);
+module controls(opcode, ALU_op, Rwe, br, DMwe, ALUinB, Rdst, Rwd, j_sig, jr_sig, jal_sig);
 
 	input [4:0] opcode, ALU_op;
-	output RWE;
+	output Rwe, br, DMwe, ALUinB, Rdst, Rwd, j_sig, jr_sig, jal_sig;
 	
 	wire add, addi, sub, and_insn, or_insn, sll, sra, mul, div, sw, lw, j, bne, jal, jr, blt, bex, setx, custom_r;
 	wire r_insn;
@@ -44,9 +44,16 @@ module controls(opcode, ALU_op, Rwe);
 	assign setx			=  opcode[4] & ~opcode[3] &  opcode[2] & ~opcode[1] &  opcode[0];	//10101
 //	assign custom_r 	=  opcode[3] & (opcode[4] || opcode[2] & ; 								//01000 - 11111
 	
+
+	assign Rwe 		= r_insn || addi || lw || jal || setx || custom_r;
+	assign br 		= bne || blt || bex;
+	assign j_sig 	= j;
+	assign DMwe		= sw;
+	assign ALUinB 	= addi || sw || lw; 
+	assign Rwd		= lw;
+	assign jr_sig 	= jr;
+	assign jal_sig = jal; // used to write to reg $31 and set PC = T.
 	
-	/* write to regfile */
-	assign Rwe = r_insn || addi || lw || jal || setx || custom_r;
 	
 	
 endmodule
@@ -111,7 +118,7 @@ module controls_ALU(opcode, ALU_op, immediate, regfile_operandA, regfile_operand
 	input [31:0] regfile_operandA, regfile_operandB, immediate;
 	output [31:0] ALU_operandA, ALU_operandB;
 	
-	wire I_insn;
+	wire immed_insn;
 	
 	assign immed_insn =  (~opcode[4] & ~opcode[3] &  opcode[2] & ~opcode[1] &  opcode[0]) || // addi
 								(~opcode[4] & ~opcode[3] &  opcode[2] &  opcode[1] &  opcode[0]) || // sw

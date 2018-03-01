@@ -107,7 +107,9 @@ module processor(
 	
 	/************************   Initialize Control Signals   ****************************/
 	
-	controls my_controls(opcode, ALU_op, ctrl_writeEnable);
+	wire br, DMwe, ALUinB, Rdst, Rwd, j_sig, jr_sig, jal_sig;
+	
+	controls my_controls(opcode, ALU_op, ctrl_writeEnable, br, DMwe, ALUinB, Rdst, Rwd, j_sig, jr_sig, jal_sig);
 	controls_regfile crf(opcode, ALU_op, rd, rs, rt, ctrl_readRegA, ctrl_readRegB, ctrl_writeReg);
 	controls_dmem    cdm(opcode, wren);
 	
