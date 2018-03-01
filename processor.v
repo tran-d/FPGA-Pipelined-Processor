@@ -107,11 +107,16 @@ module processor(
 	
 	/************************   Initialize Control Signals   ****************************/
 	
-	wire br, DMwe, ALUinB, Rdst, Rwd, j_sig, jr_sig, jal_sig;
+	wire br, DMwe, ALUinB, Rwd, j, jr, jal;
+	wire [31:0] ALU_operandA, ALU_operandB, ALU_result;
+	wire take_branch, overflow;
 	
-	controls my_controls(opcode, ALU_op, ctrl_writeEnable, br, DMwe, ALUinB, Rdst, Rwd, j_sig, jr_sig, jal_sig);
-	controls_regfile crf(opcode, ALU_op, rd, rs, rt, ctrl_readRegA, ctrl_readRegB, ctrl_writeReg);
-	controls_dmem    cdm(opcode, wren);
+	controls my_controls(opcode, ALU_op, ctrl_writeEnable, br, DMwe, ALUinB, Rwd, j, jr, jal);
+	
+	stage_decode	sd(opcode, ALU_op, rd, rs, rt, ctrl_readRegA, ctrl_readRegB, ctrl_writeReg);
+	stage_execute	se(opcode, ALU_op, immediate, shamt, data_readRegA, data_readRegB, ALU_operandA, ALU_operandB, ALU_result, take_branch, overflow);
+	stage_memory   sm(opcode, ALU_result, ALU_operandB, address_dmem, wren, data, q_dmem);
+
 	
 	
 	/*************************** Initialize Register File *******************************/
@@ -120,11 +125,7 @@ module processor(
 	
 	/*****************************    Initialize ALU    *********************************/
 	
-	wire [31:0] ALU_result;
-	wire isNotEqual, isLessThan, overflow;
-	
-	alu my_alu(data_readRegA, data_readRegB, ALU_op, shamt, 
-					ALU_result, isNotEqual, isLessThan, overflow);
+
 					
 
 
