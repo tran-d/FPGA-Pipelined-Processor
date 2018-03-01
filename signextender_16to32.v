@@ -1,11 +1,11 @@
 module signextender_16to32(in, out);
 
-	input [15:0] in;
+	input [16:0] in;
 	output [31:0] out;
 	
 	genvar i;
 	generate
-		for(i=0; i<16; i=i+1) begin: loop1
+		for(i=0; i<17; i=i+1) begin: loop1
 		
 			assign out[i] = in[i];
 		
@@ -13,9 +13,9 @@ module signextender_16to32(in, out);
 	endgenerate
 	
 	generate
-		for(i=16; i<32; i=i+1) begin: loop2
+		for(i=17; i<32; i=i+1) begin: loop2
 		
-			assign out[i] = in[15];
+			assign out[i] = in[16];
 		
 		end
 	endgenerate
