@@ -70,5 +70,23 @@ endmodule
 
 /***************************************************************************************************************/
 
+module controls_ALU(opcode, ALU_op, immediate, regfile_operandA, regfile_operandB, ALU_operandA, ALU_operandB);
+
+	input [4:0] opcode, ALU_op;
+	input [31:0] regfile_operandA, regfile_operandB, immediate;
+	output [31:0] ALU_operandA, ALU_operandB;
+	
+	wire I_insn;
+	
+	assign immed_insn =  (~opcode[4] & ~opcode[3] &  opcode[2] & ~opcode[1] &  opcode[0]) || // addi
+								(~opcode[4] & ~opcode[3] &  opcode[2] &  opcode[1] &  opcode[0]) || // sw
+								(~opcode[4] &  opcode[3] & ~opcode[2] & ~opcode[1] & ~opcode[0]);   // lw
+	
+	assign ALU_operandA = regfile_operandA[31:0];
+	
+	
+	assign ALU_operandB = immed_insn ? immediate : regfile_operandB;
+
+endmodule
 
 /***************************************************************************************************************/

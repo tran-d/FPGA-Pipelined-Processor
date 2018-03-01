@@ -105,11 +105,18 @@ module processor(
 	assign immediate 	= q_imem[16:0];
 	assign target 		= q_imem[26:0];
 	
+	/************************   Initialize Control Signals   ****************************/
+	
+	controls my_controls(opcode, ALU_op, ctrl_writeEnable);
+	controls_regfile crf(opcode, ALU_op, rd, rs, rt, ctrl_readRegA, ctrl_readRegB, ctrl_writeReg);
+	controls_dmem    cdm(opcode, wren);
+	
+	
 	/*************************** Initialize Register File *******************************/
 
 	//	assign data_writeReg = ???
 	
-	/***************************      Initialize ALU      ******************************/
+	/*****************************    Initialize ALU    *********************************/
 	
 	wire [31:0] ALU_result;
 	wire isNotEqual, isLessThan, overflow;
@@ -117,11 +124,6 @@ module processor(
 	alu my_alu(data_readRegA, data_readRegB, ALU_op, shamt, 
 					ALU_result, isNotEqual, isLessThan, overflow);
 					
-	/***************************      Initialize ALU      ******************************/
-	
-	controls my_controls(opcode, ALU_op, ctrl_writeEnable);
-	controls_regfile crf(opcode, ALU_op, rd, rs, rt, ctrl_readRegA, ctrl_readRegB, ctrl_writeReg);
-	controls_dmem    cdm(opcode, wren);
-	
+
 
 endmodule
