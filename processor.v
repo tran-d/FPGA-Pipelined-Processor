@@ -75,19 +75,19 @@ module processor(
 	input clock, reset;
 
 	// Imem
-	output [11:0] address_imem;
+	output [11:0] address_imem;      /*no driver*/
 	input [31:0] q_imem;
 
 	// Dmem
-	output [11:0] address_dmem;
-	output [31:0] data;
+	output [11:0] address_dmem;		/*no driver*/
+	output [31:0] data;					/*no driver*/
 	output wren;
 	input [31:0] q_dmem;
 
 	// Regfile
 	output ctrl_writeEnable;
 	output [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
-	output [31:0] data_writeReg;
+	output [31:0] data_writeReg;		/*no driver*/
 	input [31:0] data_readRegA, data_readRegB;
 
 	/* YOUR CODE STARTS HERE */
@@ -105,19 +105,23 @@ module processor(
 	assign immediate 	= q_imem[16:0];
 	assign target 		= q_imem[26:0];
 	
-	/******Initialize Register File ******/
-	//	assign ctrl_writeEnable = ???         
-//	assign ctrl_readRegA 	= rs;
-//	assign ctrl_readRegB 	= rt;
-//	assign ctrl_writeReg 	= rd;
+	/*************************** Initialize Register File *******************************/
+
 	//	assign data_writeReg = ???
 	
-	/*********** Initialize ALU **********/
+	/***************************      Initialize ALU      ******************************/
+	
 	wire [31:0] ALU_result;
 	wire isNotEqual, isLessThan, overflow;
 	
 	alu my_alu(data_readRegA, data_readRegB, ALU_op, shamt, 
 					ALU_result, isNotEqual, isLessThan, overflow);
+					
+	/***************************      Initialize ALU      ******************************/
+	
+	controls my_controls(opcode, ALU_op, ctrl_writeEnable);
+	controls_regfile crf(opcode, ALU_op, rd, rs, rt, ctrl_readRegA, ctrl_readRegB, ctrl_writeReg);
+	controls_dmem    cdm(opcode, wren);
 	
 
 endmodule
