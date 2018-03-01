@@ -1,3 +1,18 @@
+module PC(in, clock, reset, ena, out);
+
+	input [31:0] in;
+	input clock, reset, ena;
+	output [31:0] out;
+
+	genvar i;
+	generate
+		for (i = 0; i < 32; i = i + 1) begin: loop1
+			dflipflop mydffe(in[i], clock, reset, ena, out[i]);
+		end
+	endgenerate
+
+endmodule
+
 /*********************************************************/
 
 /* Used in div32.v */
