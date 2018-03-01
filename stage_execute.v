@@ -26,6 +26,8 @@ module stage_execute(
 	alu my_alu(ALU_operandA, ALU_operandB, ALU_op, shamt, ALU_result, isNotEqual, isLessThan, overflow);
 					
 	
+	assign take_branch = isNotEqual;
+	
 
 
 endmodule
@@ -50,5 +52,14 @@ module execute_controls(opcode, ALU_op, immediate, regfile_operandA, regfile_ope
 	assign ALU_operandA = regfile_operandA[31:0];
 	assign ALU_operandB = immed_insn ? immediate_ext : regfile_operandB;
 
+
+endmodule
+
+
+module branch_controls();
+
+	// complete bne, bex, blt
+	// compute take_branch 
+	// PC+1 or PC = T
 
 endmodule

@@ -111,12 +111,17 @@ module processor(
 	wire [31:0] ALU_operandA, ALU_operandB, ALU_result;
 	wire take_branch, overflow;
 	
+	wire [31:0] pc_in, pc_plus_4;
+	wire pc_ena;
+	wire [31:0] data_writeStatusReg;
+	
 	controls my_controls(opcode, ALU_op, ctrl_writeEnable, br, DMwe, ALUinB, Rwd, j, jr, jal);
 	
+	pc_module 		pc(pc_in, clock, reset, pc_ena, address_imem, pc_plus_4);
 	stage_decode	sd(opcode, ALU_op, rd, rs, rt, ctrl_readRegA, ctrl_readRegB, ctrl_writeReg);
 	stage_execute	se(opcode, ALU_op, immediate, shamt, data_readRegA, data_readRegB, ALU_operandA, ALU_operandB, ALU_result, take_branch, overflow);
 	stage_memory   sm(opcode, ALU_result, ALU_operandB, q_dmem, address_dmem, wren, data);
-//	stage_write		sw(opcode, ALU_op, ALU_result, pc_plus_1, q_dmem, overflow, data_writeReg, data_writeStatusReg);
+	stage_write		sw(opcode, ALU_op, ALU_result, pc_plus_4, q_dmem, overflow, data_writeReg, data_writeStatusReg);
 
 	
 	
