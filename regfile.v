@@ -29,21 +29,18 @@ module regfile (
 	/***** create decoder for write_reg *****/						
 	decoder5to32 my_decoder(ctrl_writeReg, selectedRegisterBits);
 	
+	reg32 myregisterZero(reg_output_bus[0], 32'b0, clock, 1'b0, ctrl_reset);
 
 	generate
 	
-		for(i=0; i<32; i=i+1) begin: loop1
+		for(i=1; i<32; i=i+1) begin: loop1
 			
 		
 			/***** create writeEnable for selected write_reg *****/
 			and my_and(reg_writeEnable[i], selectedRegisterBits[i], ctrl_writeEnable);
 			
 			/***** create 32-bit register *****/
-			
-			if(i==0)
-				reg32 myregisterZero(reg_output_bus[i], 32'b0, clock, 1'b0, ctrl_reset);
-			else
-				reg32 myregister(reg_output_bus[i], data_writeReg, clock, reg_writeEnable[i], ctrl_reset);
+			reg32 myregister(reg_output_bus[i], data_writeReg, clock, reg_writeEnable[i], ctrl_reset);
 			
 			for(j=0; j<32; j=j+1) begin: transpose
 			

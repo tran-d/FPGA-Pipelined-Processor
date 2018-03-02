@@ -117,7 +117,7 @@ module mux8_tristate(in, ALUopcode, out);
 	genvar i;
 	generate
 	
-		for(i=0; i<6; i=i+1) begin: loop1
+		for(i=0; i<6; i=i+1) begin: loop_blah
 		
 			tristate_buffer mytb(in[i], decoderbits[i], out);
 		

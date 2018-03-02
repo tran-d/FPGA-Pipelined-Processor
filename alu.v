@@ -49,21 +49,13 @@ module alu(data_operandA, data_operandB, ctrl_ALUopcode, ctrl_shiftamt, data_res
 //	assign alt_data_operandB = ctrl_ALUopcode[0] ? not_data_operandB : data_operandB;
 //	assign operation_bits[0] = alt_operation_bits;
 //	assign operation_bits[1] = alt_operation_bits;
-//	
+
+	
 	generate
-		for(i=0; i<32; i=i+1) begin: loopSubtract
+		for(i=0; i<32; i=i+1) begin: loop_alu
 		
 			not notgate(not_data_operandB[i], data_operandB[i]);
-//			assign alt_data_operandB[i] = ctrl_ALUopcode[0] ? not_data_operandB[i] : data_operandB[i];
-//			assign operation_bits[0][i] = alt_operation_bits[i];
-//			assign operation_bits[1][i] = alt_operation_bits[i];
-		
-		end
-	endgenerate
-	
-	
-	generate
-		for(i=0; i<32; i=i+1) begin: loop1
+			
 			for(j=0; j<6; j=j+1) begin: loop2
 			
 				assign sorted_bits[i][j] = operation_bits[j][i];

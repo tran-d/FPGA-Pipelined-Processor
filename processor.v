@@ -126,10 +126,16 @@ module processor(
 	/******************************* Initialize Pipelines **********************************/
 	
 	pc_module 		pc(pc_in, clock, reset, pc_ena, address_imem, pc_plus_4, pc_upper_5);
-	stage_decode	sd(opcode, ALU_op, rd, rs, rt, ctrl_readRegA, ctrl_readRegB);
-	stage_execute	se(opcode, ALU_op, immediate, shamt, data_readRegA, data_readRegB, ALU_operandA, ALU_operandB, ALU_result, take_branch, overflow);
+	
+	stage_decode	sd(opcode, ALU_op, rd, rs, rt, ctrl_readRegA, ctrl_readRegB); 
+	
+	stage_execute	se(opcode, ALU_op, immediate, shamt, target, data_readRegA, data_readRegB, pc_plus_4, pc_upper_5, 
+								ALU_operandA, ALU_operandB, ALU_result, take_branch, overflow, pc_in);
+								
 	stage_memory   sm(opcode, ALU_result, ALU_operandB, q_dmem, address_dmem, wren, data);
-	stage_write		sw(opcode, ALU_op, ALU_result, rd, pc_plus_4, pc_upper_5, target, q_dmem, overflow, data_writeReg, data_writeStatusReg, ctrl_writeReg);
+	
+	stage_write		sw(opcode, ALU_op, ALU_result, rd, pc_plus_4, pc_upper_5, target, q_dmem, 
+								overflow, data_writeReg, data_writeStatusReg, ctrl_writeReg);
 
 	
 	
