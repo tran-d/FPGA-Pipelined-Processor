@@ -92,7 +92,8 @@ module execute_controls(opcode, ALU_op, immediate, target, regfile_operandA, reg
 	assign take_branch 	= take_bne || take_blt || take_bex;
 	
 	
-	wire [31:0] pc_plus_4_plus_immediate, dovf, dne, dlt;
+	wire [31:0] pc_plus_4_plus_immediate;
+	wire dovf, dne, dlt;
 	
 	/* PC controls */ 
 	assign pc_in 			= (j | jal | take_bex) 	? {pc_upper_5, target} 		:  inter2; 		// PC = T, 				j/jal/take_bex

@@ -124,8 +124,9 @@ module processor(
 	controls my_controls(opcode, ALU_op, ctrl_writeEnable, br, DMwe, ALUinB, Rwd, j, jr, jal);
 	
 	/******************************* Initialize Pipelines **********************************/
+	assign pc_ena = 1'b1;
 	
-	pc_module 		pc(pc_in, clock, reset, pc_ena, address_imem, pc_plus_4, pc_upper_5);
+	pc_module 		my_pc(pc_in, clock, reset, pc_ena, address_imem, pc_plus_4, pc_upper_5);
 	
 	stage_decode	sd(opcode, ALU_op, rd, rs, rt, ctrl_readRegA, ctrl_readRegB); 
 	

@@ -31,7 +31,7 @@ module stage_write(
 	assign intermediate  	 	= lw 	? q_dmem	   : ALU_result;
 	assign data_writeReg		   = jal ? pc_plus_4 : intermediate;		// lw, jal, ALU_result
 	assign data_writeStatusReg = write_rstatus_exception ? {{31{1'b0}}, exception} : {pc_upper_5, target};  // rstatus = T (setx) or exception (add, addi, sub, mul, div)
-	assign ctrl_writeReg 	= jal ? 5'b11111 : rd[4:0];
+	assign ctrl_writeReg 		= jal ? 5'b11111 : rd;
 	
 endmodule
 
