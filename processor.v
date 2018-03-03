@@ -131,6 +131,10 @@ module processor(
 	assign enable_xm = 1'b1;
 	assign enable_mw = 1'b1;
 	
+	wire [31:0] pc_fd_out, pc_dx_out;
+	wire [31:0] insn_fd_out, insn_dx_out, insn_mw_out, insn_xm_out;
+	wire [31:0] a_dx_out, b_dx_out, o_xm_out, b_xm_out, o_mw_out, d_mw_out;
+	
 	latch_PC 		lpc(clock, reset, enable_pc, pc_in, pc_out);
 	
 	
@@ -140,28 +144,26 @@ module processor(
 	latch_FD			lfd(clock, reset, enable_fd, pc_plus_1, q_imem, pc_fd_out, insn_fd_out);
 
 	
-	stage_decode	decode(opcode, ALU_op, rd, rs, rt, ctrl_readRegA, ctrl_readRegB); 
+	stage_decode	decode(insn_fd_out, ctrl_readRegA, ctrl_readRegB); 
 
 	
 	latch_DX			ldx(clock, reset, enable_dx, pc_fd_out, insn_fd_out, pc_dx_out, insn_dx_out, data_readRegA, data_readRegB, a_dx_out, b_dx_out);
 
 	
-	stage_execute	execute(opcode, ALU_op, immediate, shamt, target, data_readRegA, data_readRegB, pc_plus_1, pc_upper_5, 
-
-	
-	execute_b_out, execute_o_out, take_branch, overflow, pc_in, pc_out);			
+	stage_execute	execute(insn_dx_out, data_readRegA, data_readRegB, pc_plus_1, pc_upper_5,  // inputs
+								execute_o_out, execute_b_out, take_branch, overflow, pc_in);			// outputs
 	
 	
 	latch_XM       lxm(clock, reset, enable_xm, insn_dx_out, insn_xm_out, execute_o_out, execute_b_out, o_xm_out, b_xm_out);
 	
 	
-	stage_memory   memory(opcode, o_xm_out, b_xm_out, memory_o_out, memory_d_out, q_dmem, address_dmem, wren, d_dmem);
+	stage_memory   memory(insn_xm_out, q_dmem, o_xm_out, b_xm_out, memory_o_out, memory_d_out, d_dmem, address_dmem, wren);
 
 	
-	latch_MW       lmw(clock, reset, enable_mw, insn_xm_out, insn_mw_out, memory_o_out, memory_d_out, o_mx_out, d_mw_out);
+	latch_MW       lmw(clock, reset, enable_mw, insn_xm_out, insn_mw_out, memory_o_out, memory_d_out, o_mw_out, d_mw_out);
 
 	
-	stage_write		writeback(opcode, ALU_op, o_mx_out, rd, pc_plus_1, pc_upper_5, target, d_mw_out, 
+	stage_write		writeback(opcode, ALU_op, o_mw_out, rd, pc_plus_1, pc_upper_5, target, d_mw_out, 
 								overflow, data_writeReg, data_writeStatusReg, ctrl_writeReg);
 
 	

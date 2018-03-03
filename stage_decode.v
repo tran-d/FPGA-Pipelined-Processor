@@ -1,28 +1,32 @@
 module stage_decode(
 
-	opcode,
-	ALU_op,
-	rd,
-	rs,
-	rt,
+	insn,
 	ctrl_readRegA,
 	ctrl_readRegB);
 	
 	
-	input [4:0] opcode, ALU_op, rd, rs, rt;
+	input [31:0] insn;
 	output [4:0] ctrl_readRegA, ctrl_readRegB;
 	
-	decode_controls dc(opcode, ALU_op, rd, rs, rt, ctrl_readRegA, ctrl_readRegB);
+	decode_controls dc(insn, ctrl_readRegA, ctrl_readRegB);
 	
 endmodule
 
 
-module decode_controls(opcode, ALU_op, rd, rs, rt, ctrl_readRegA, ctrl_readRegB);
+module decode_controls(insn, ctrl_readRegA, ctrl_readRegB);
 
-	input [4:0] opcode, ALU_op, rd, rs, rt;
-	output [4:0]  ctrl_readRegA, ctrl_readRegB;
+	input [31:0] insn;
+	output [4:0] ctrl_readRegA, ctrl_readRegB;
+	
+	wire [4:0] opcode, rd, rs, rt;
+	
+	assign opcode 		= insn[31:27];
+	assign rd 			= insn[26:22];
+	assign rs 			= insn[21:17];
+	assign rt 			= insn[16:12];
 	
 	wire r_insn, bex;
+	
 	assign r_insn 		= ~opcode[4] & ~opcode[3] & ~opcode[2] & ~opcode[1] & ~opcode[0];
 	assign bex			=  opcode[4] & ~opcode[3] &  opcode[2] &  opcode[1] & ~opcode[0];	//10110
 	

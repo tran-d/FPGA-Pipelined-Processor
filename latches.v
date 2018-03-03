@@ -1,7 +1,8 @@
 module latch_PC(clock, reset, enable, pc_in, pc_out);
 
-	input [31:0] pc_in, pc_out;
+	input [31:0] pc_in;
 	input clock, reset, enable;
+	output [31:0] pc_out;
 	
 	reg32 pc(pc_in, clock, reset, enable, pc_out);
 
@@ -56,6 +57,6 @@ module latch_MW(clock, reset, enable, insn_in, insn_out, o_in, d_in, o_out, d_ou
 	reg32 pc_insn(insn_in, clock, reset, 1'b1, insn_out);
 	
 	reg32 o(o_in, clock, reset, 1'b1, o_out);
-	reg32 d(b_in, clock, reset, 1'b1, b_out);
+	reg32 d(d_in, clock, reset, 1'b1, d_out);
 
 endmodule
