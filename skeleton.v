@@ -27,15 +27,15 @@ module skeleton(clock, reset);
     // Figure out how to generate a Quartus syncram component and commit the generated verilog file.
     // Make sure you configure it correctly!
     wire [11:0] address_dmem;
-    wire [31:0] data;
+    wire [31:0] d_dmem;
     wire wren;
     wire [31:0] q_dmem;
     dmem my_dmem(
-        .address    (/* 12-bit wire */),       // address of data
-        .clock      (~clock),                  // may need to invert the clock
-        .data	    (/* 32-bit data in */),    // data you want to write
-        .wren	    (/* 1-bit signal */),      // write enable
-        .q          (/* 32-bit data out */)    // data from dmem
+        .address    	(address_dmem),       // address of data
+        .clock      	(~clock),                  // may need to invert the clock
+        .data	   	(d_dmem),    // data you want to write
+        .wren	    	(wren),      // write enable
+        .q      		(q_dmem)    // data from dmem
     );
 
     /** REGFILE **/
@@ -68,7 +68,7 @@ module skeleton(clock, reset);
 
         // Dmem
         address_dmem,                   // O: The address of the data to get or put from/to dmem
-        data,                           // O: The data to write to dmem
+        d_dmem,                           // O: The data to write to dmem
         wren,                           // O: Write enable for dmem
         q_dmem,                         // I: The data from dmem
 

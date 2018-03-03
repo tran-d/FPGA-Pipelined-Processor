@@ -58,7 +58,7 @@ module processor(
 
     // Dmem
     address_dmem,                   // O: The address of the data to get or put from/to dmem
-    data,                           // O: The data to write to dmem
+    d_dmem,                           // O: The data to write to dmem
     wren,                           // O: Write enable for dmem
     q_dmem,                         // I: The data from dmem
 
@@ -80,7 +80,7 @@ module processor(
 
 	// Dmem
 	output [11:0] address_dmem;		/*no driver*/
-	output [31:0] data;					/*no driver*/
+	output [31:0] d_dmem;					/*no driver*/
 	output wren;
 	input [31:0] q_dmem;
 
@@ -133,7 +133,7 @@ module processor(
 	stage_execute	execute(opcode, ALU_op, immediate, shamt, target, data_readRegA, data_readRegB, pc_plus_4, pc_upper_5, 
 								execute_b_out, execute_o_out, take_branch, overflow, pc_in);
 								
-	stage_memory   memory(opcode, execute_o_out, execute_b_out, memory_o_out, memory_d_out, q_dmem, address_dmem, wren, data);
+	stage_memory   memory(opcode, execute_o_out, execute_b_out, memory_o_out, memory_d_out, q_dmem, address_dmem, wren, d_dmem);
 	
 	stage_write		writeback(opcode, ALU_op, execute_o_out, rd, pc_plus_4, pc_upper_5, target, q_dmem, 
 								overflow, data_writeReg, data_writeStatusReg, ctrl_writeReg);

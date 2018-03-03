@@ -30,17 +30,19 @@ module processor_tb_auto();
 
 	// wire [31:0] pc_pc_in = dut.my_processor.latch_pc_pc_in;
 	// wire [31:0] pc_pc_out = dut.my_processor.latch_pc_pc_out;
+	wire [31:0] q_dmem = dut.my_processor.q_dmem;
 	// wire [31:0] decode_a_out = dut.my_processor.decode.a_out;
 	// wire [31:0] decode_b_out = dut.my_processor.decode.b_out;
 	// wire [31:0] execute_a_in = dut.my_processor.execute.a_in;
 	// wire [31:0] execute_b_in = dut.my_processor.execute.b_in;
+	 
 	wire [31:0] execute_o_out = dut.my_processor.execute.o_out;
 	wire [31:0] execute_b_out = dut.my_processor.execute.b_out;
 	wire [31:0] memory_o_in = dut.my_processor.memory.o_in;
 	wire [31:0] memory_b_in = dut.my_processor.memory.b_in;
 	wire [31:0] memory_o_out = dut.my_processor.memory.o_out;
 	wire [11:0] memory_address = dut.my_processor.memory.address_dmem;
-	wire [31:0] q_dmem = dut.my_processor.memory.q_dmem;
+	wire [31:0] memory_q_dmem = dut.my_processor.memory.q_dmem;
 	wire [31:0] memory_d_out = dut.my_processor.memory.d_out;
 	wire [31:0] writeback_o_in = dut.my_processor.writeback.o_in;
 	wire [31:0] writeback_d_in = dut.my_processor.writeback.d_in;
@@ -76,10 +78,12 @@ module processor_tb_auto();
 				$display("Execute_o_out: %d, Execute_b_out: %d", execute_o_out, execute_b_out);
 				
 				$display("Memory_o_in: %d, Memory_d_in: %d", memory_o_in, memory_b_in);
-				$display("Memory_address: %d, q_dmem: %d", memory_address, q_dmem);
+				$display("Memory_address: %d, q_dmem: %d", memory_address, memory_q_dmem);
 				$display("Memory_o_out: %d, Memory_d_out: %d", memory_o_out, memory_d_out);
 				
 				$display("Write_o_in: %d, Write_d_in: %d", writeback_o_in, writeback_d_in);
+				
+				$display("q_dmem: %d", q_dmem);
 				error_count = error_count + 1;
 			end
 			else
