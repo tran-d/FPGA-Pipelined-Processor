@@ -42,7 +42,7 @@ module regfile (
 			
 			/***** create 32-bit register *****/
 			if(i==0)
-				reg32 myregisterZero(register_output[0], 32'b0, clock, 1'b0, ctrl_reset);
+				reg32 myregisterZero(register_output[i], 32'b0, clock, 1'b0, ctrl_reset);
 			else
 				reg32 myregister(register_output[i], data_writeReg, clock, reg_writeEnable[i], ctrl_reset);
 			

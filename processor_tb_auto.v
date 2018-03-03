@@ -6,7 +6,7 @@
   
 module processor_tb_auto();
 
-	integer CYCLE_LIMIT = 5; // Modify this to change number of cycles run during test
+	integer CYCLE_LIMIT = 3; // Modify this to change number of cycles run during test
 
 	reg clock = 0, reset = 0;
 	integer cycle_count = 0, error_count = 0;
@@ -28,6 +28,12 @@ module processor_tb_auto();
 	wire [4:0] regfile_ctrlWrite = dut.my_processor.ctrl_writeReg;
 	// wire [4:0] decode_ctrl_b = dut.my_processor.ctrl_readRegB;
 	// wire [31:0] q_dmem = dut.my_processor.q_dmem;
+
+	wire [4:0] ALU_op 	     = dut.my_processor.execute.ALU_op;
+	wire [31:0] alu_operandA = dut.my_processor.execute.ALU_operandA;
+	wire [31:0] alu_operandB = dut.my_processor.execute.ALU_operandB;
+	wire [31:0] alu_result = dut.my_processor.execute.o_out;
+	wire [31:0] exec_alu_operandB = dut.my_processor.execute.ec.ALU_operandB;
 
 	// wire [31:0] pc_pc_in = dut.my_processor.latch_pc_pc_in;
 	// wire [31:0] pc_pc_out = dut.my_processor.latch_pc_pc_out;
@@ -74,7 +80,7 @@ module processor_tb_auto();
 		input [31:0] expected_value;
 		begin
 			if(dut.my_regfile.register_output[reg_num] !== expected_value) begin
-				$display("ERROR: register $%d (expected: %h, read: %h)", reg_num, expected_value, dut.my_regfile.register_output[reg_num]);
+				$display("ERROR: register $%d (expected: %d, read: %d)", reg_num, expected_value, dut.my_regfile.register_output[reg_num]);
 				$display("\t\t\t\tExecute_o_out: %d, Execute_b_out: %d", execute_o_out, execute_b_out);
 				//$display("\t\t\t\tMemory_o_in: %d, Memory_b_in: %d", memory_o_in, memory_b_in);
 				$display("\t\t\t\tMemory_address: %d, q_dmem: %d", memory_address, memory_q_dmem);
@@ -82,6 +88,7 @@ module processor_tb_auto();
 				$display("\t\t\t\tWrite_o_in: %d, Write_d_in: %d", writeback_o_in, writeback_d_in);
 				$display("Write register: %d", regfile_ctrlWrite);
 				$display("\t\t\t\ReadRegA: %d, ReadRegB: %d", regfile_ctrlA, regfile_ctrlA);
+				$display("ALU_op: %b, alu_opA: %d, alu_opB: %d alu_result: %d", ALU_op, alu_operandA, alu_operandB, alu_operandB, exec_alu_operandB, alu_result);
 				error_count = error_count + 1;
 			end
 			else
@@ -90,9 +97,10 @@ module processor_tb_auto();
 	endtask
 
 	task performTests; begin
-		checkRegister(32'd1, 32'd0);
-		checkRegister(32'd7, 32'd14);
-		checkRegister(32'd11, 32'd14);
+		checkRegister(32'd6, 32'd3);
+		checkRegister(32'd7, -32'd4);
+		checkRegister(32'd8, 32'd5);
+		checkRegister(32'd9, 32'd6);
 	end endtask
 
 endmodule

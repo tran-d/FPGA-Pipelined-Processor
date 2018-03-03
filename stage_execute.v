@@ -27,11 +27,14 @@ module stage_execute(
 
 	wire isNotEqual, isLessThan;
 	wire [31:0] ALU_operandA, ALU_operandB;
+	
+	wire [4:0] mux_ALU_op;
+
 		
 	execute_controls ec(opcode, ALU_op, immediate, target, regfile_operandA, regfile_operandB, 
-					pc_plus_4, pc_upper_5, ALU_operandA, ALU_operandB, isNotEqual, isLessThan, take_branch, pc_in);
+					pc_plus_4, pc_upper_5, ALU_operandA, ALU_operandB, isNotEqual, isLessThan, take_branch, pc_in, mux_ALU_op);
 		
-	alu my_alu(ALU_operandA, ALU_operandB, ALU_op, shamt, o_out, isNotEqual, isLessThan, overflow);
+	alu my_alu(ALU_operandA, ALU_operandB, mux_ALU_op, shamt, o_out, isNotEqual, isLessThan, overflow);
 	
 	assign b_out = regfile_operandB;
 	
@@ -40,7 +43,7 @@ endmodule
 
 
 module execute_controls(opcode, ALU_op, immediate, target, regfile_operandA, regfile_operandB, 
-					pc_plus_4, pc_upper_5, ALU_operandA, ALU_operandB, isNotEqual, isLessThan, take_branch, pc_in);
+					pc_plus_4, pc_upper_5, ALU_operandA, ALU_operandB, isNotEqual, isLessThan, take_branch, pc_in, mux_ALU_op);
 
 	input [4:0] opcode, ALU_op, pc_upper_5;
 	input [26:0] target;
@@ -50,11 +53,14 @@ module execute_controls(opcode, ALU_op, immediate, target, regfile_operandA, reg
 	
 	output [31:0] ALU_operandA, ALU_operandB, pc_in;
 	output take_branch;
+	output [4:0] mux_ALU_op;
 	
-	wire immed_insn, bne, blt, bex, j, jal, jr, take_bne, take_blt, take_bex;
+	wire addi, immed_insn, bne, blt, bex, j, jal, jr, take_bne, take_blt, take_bex;
 	wire [31:0] immediate_ext, inter1, inter2, inter3;
 	
 	signextender_16to32 my_se(immediate, immediate_ext);
+	
+	assign addi 		= (~opcode[4] & ~opcode[3] &  opcode[2] & ~opcode[1] &  opcode[0]); // addi needs ALU_op = 00000
 	
 	assign immed_insn =  (~opcode[4] & ~opcode[3] &  opcode[2] & ~opcode[1] &  opcode[0]) || // addi
 								(~opcode[4] & ~opcode[3] &  opcode[2] &  opcode[1] &  opcode[0]) || // sw
@@ -69,11 +75,11 @@ module execute_controls(opcode, ALU_op, immediate, target, regfile_operandA, reg
 	assign jr			= ~opcode[4] & ~opcode[3] &  opcode[2] & ~opcode[1] & ~opcode[0];	//00100
 	
 	
-	
 	assign ALU_operandA 	= regfile_operandA[31:0];
-	
 	assign ALU_operandB 	= immed_insn  		? immediate_ext	 				: inter1[31:0];
 	assign inter1[31:0] 	= bex					? 32'd0							: regfile_operandB;
+	
+	assign mux_ALU_op 	= addi ? 5'd0 : ALU_op;
 	
 	
 	/* Branch Controls */ 

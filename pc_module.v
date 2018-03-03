@@ -11,7 +11,6 @@ module pc_module(pc_in, clock, reset, pc_ena, address_imem, pc_plus_4, pc_upper_
 	wire [31:0] pc_out;
 	
 	assign address_imem[11:0] = pc_out[11:0];
-//	assign address_imem = {11{1'b1}};
 	
 	wire dovf, dne, dlt;
 	
