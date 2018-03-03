@@ -58,6 +58,7 @@ module execute_controls(opcode, ALU_op, immediate, target, regfile_operandA, reg
 	
 	wire addi, immed_insn, bne, blt, bex, j, jal, jr, take_bne, take_blt, take_bex;
 	wire [31:0] immediate_ext, inter1, inter2, inter3;
+	wire [4:0] interm_ALU_op;
 	
 	signextender_16to32 my_se(immediate, immediate_ext);
 	
@@ -80,7 +81,8 @@ module execute_controls(opcode, ALU_op, immediate, target, regfile_operandA, reg
 	assign ALU_operandB 	= immed_insn  		? immediate_ext	 				: inter1[31:0];
 	assign inter1[31:0] 	= bex					? 32'd0							: regfile_operandB;
 	
-	assign mux_ALU_op 	= addi ? 5'd0 : ALU_op;
+	assign mux_ALU_op 	= addi ? 5'd0 : interm_ALU_op;
+	assign interm_ALU_op = (blt | bne | bex)  ? 5'd1 : ALU_op;
 	
 	
 	/* Branch Controls */ 
