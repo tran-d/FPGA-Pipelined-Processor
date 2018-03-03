@@ -92,11 +92,12 @@ module processor(
 
 	/* YOUR CODE STARTS HERE */
 
-//	wire [4:0] opcode, rd, rs, rt, shamt, ALU_op;
+	wire [4:0] opcode;
+//	wire [4:0] rd, rs, rt, shamt, ALU_op;
 //	wire [16:0] immediate;
 //	wire [26:0] target;
 //	
-//	assign opcode 		= q_imem[31:27];
+	assign opcode 		= q_imem[31:27];
 //	assign rd 			= q_imem[26:22];
 //	assign rs 			= q_imem[21:17];
 //	assign rt 			= q_imem[16:12];
@@ -135,47 +136,69 @@ module processor(
 	wire [31:0] insn_fd_out, insn_dx_out, insn_mw_out, insn_xm_out;
 	wire [31:0] a_dx_out, b_dx_out, o_xm_out, b_xm_out, o_mw_out, d_mw_out;
 	
+	
 	latch_PC 		lpc(clock, reset, enable_pc, pc_in, pc_out);
 	
 	
 	stage_fetch    fetch(pc_out, address_imem, pc_plus_1, pc_upper_5);
-	
 
+	
 	latch_FD			lfd(clock, reset, enable_fd, pc_plus_1, q_imem, pc_fd_out, insn_fd_out);
 
-	
+
 	stage_decode	decode(insn_fd_out, ctrl_readRegA, ctrl_readRegB); 
 
 	
 	latch_DX			ldx(clock, reset, enable_dx, pc_fd_out, insn_fd_out, pc_dx_out, insn_dx_out, data_readRegA, data_readRegB, a_dx_out, b_dx_out);
 
 	
-	stage_execute	execute(insn_dx_out, data_readRegA, data_readRegB, pc_plus_1, pc_upper_5,  // inputs
+	stage_execute	execute(insn_dx_out, a_dx_out, b_dx_out, pc_plus_1, pc_upper_5,  		// inputs
 								execute_o_out, execute_b_out, take_branch, overflow, pc_in);			// outputs
 	
-	
+
 	latch_XM       lxm(clock, reset, enable_xm, insn_dx_out, insn_xm_out, execute_o_out, execute_b_out, o_xm_out, b_xm_out);
 	
-	
+
 	stage_memory   memory(insn_xm_out, q_dmem, o_xm_out, b_xm_out, memory_o_out, memory_d_out, d_dmem, address_dmem, wren);
 
 	
 	latch_MW       lmw(clock, reset, enable_mw, insn_xm_out, insn_mw_out, memory_o_out, memory_d_out, o_mw_out, d_mw_out);
 
-	
+
 	stage_write		writeback(insn_mw_out, o_mw_out, d_mw_out, pc_plus_1, pc_upper_5, overflow, 			// inputs
 									data_writeReg, data_writeStatusReg, ctrl_writeReg, ctrl_writeEnable);		// outputs
-
 	
 	
-	/*************************** Initialize Register File *******************************/
-
-	//	assign data_writeReg = ???
+	/* Single Cycle */
 	
-	/*****************************    Initialize ALU    *********************************/
+	/*
+	latch_PC 		lpc(clock, reset, enable_pc, pc_in, pc_out);
 	
+	stage_fetch    fetch(pc_out, address_imem, pc_plus_1, pc_upper_5);
+	
+	latch_FD			lfd(clock, reset, enable_fd, pc_plus_1, q_imem, pc_fd_out, insn_fd_out);
 
-					
+	// insn_fd_out
+	stage_decode	decode(q_imem, ctrl_readRegA, ctrl_readRegB); 
+	
+	latch_DX			ldx(clock, reset, enable_dx, pc_fd_out, insn_fd_out, pc_dx_out, insn_dx_out, data_readRegA, data_readRegB, a_dx_out, b_dx_out);
 
+	// insn_dx_out
+	stage_execute	execute(q_imem, data_readRegA, data_readRegB, pc_plus_1, pc_upper_5,  		// inputs
+								execute_o_out, execute_b_out, take_branch, overflow, pc_in);			// outputs
+	 
+	latch_XM       lxm(clock, reset, enable_xm, insn_dx_out, insn_xm_out, execute_o_out, execute_b_out, o_xm_out, b_xm_out);
+	
+	// insn_xm_out
+	stage_memory   memory(q_imem, q_dmem, execute_o_out, execute_b_out, memory_o_out, memory_d_out, d_dmem, address_dmem, wren);
+	
+	latch_MW       lmw(clock, reset, enable_mw, insn_xm_out, insn_mw_out, memory_o_out, memory_d_out, o_mw_out, d_mw_out);
+	
+	// insn_mw_out
+	stage_write		writeback(q_imem, memory_o_out, memory_d_out, pc_plus_1, pc_upper_5, overflow, 			// inputs
+									data_writeReg, data_writeStatusReg, ctrl_writeReg, ctrl_writeEnable);		// outputs
+	
+	*/
+	
 
 endmodule

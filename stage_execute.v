@@ -64,7 +64,7 @@ module execute_controls(insn, regfile_operandA, regfile_operandB, pc_plus_4, pc_
 	
 	
 	/* ALU Controls */
-	wire addi, immed_insn, bex;
+	wire addi, immed_insn, bne, blt, bex, j, jal, jr;
 	wire [31:0] immediate_ext, inter1;
 	wire [4:0] interm_ALU_op;
 	
@@ -86,7 +86,7 @@ module execute_controls(insn, regfile_operandA, regfile_operandB, pc_plus_4, pc_
 	
 	
 	/* Branch Controls */ 
-	wire  bne, blt, take_bne, take_blt, take_bex;
+	wire take_bne, take_blt, take_bex;
 	
 	assign bne	 		= ~opcode[4] & ~opcode[3] & ~opcode[2] &  opcode[1] & ~opcode[0];	//00010
 	assign blt	 		= ~opcode[4] & ~opcode[3] &  opcode[2] &  opcode[1] & ~opcode[0];	//00110
@@ -104,7 +104,6 @@ module execute_controls(insn, regfile_operandA, regfile_operandB, pc_plus_4, pc_
 	/* PC controls */ 
 	wire [31:0] pc_plus_4_plus_immediate;
 	wire dovf, dne, dlt;
-	wire j, jal, jr;
 	wire [31:0] inter2, inter3;
 	
 	assign pc_in 			= (j | jal | take_bex) 	? {pc_upper_5, target} 		:  inter2; 		// PC = T, 				j/jal/take_bex

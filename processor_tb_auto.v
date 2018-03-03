@@ -6,7 +6,7 @@
   
 module processor_tb_auto();
 
-	integer CYCLE_LIMIT = 10; // Modify this to change number of cycles run during test
+	integer CYCLE_LIMIT = 15; // Modify this to change number of cycles run during test
 
 	reg clock = 0, reset = 0;
 	integer cycle_count = 0, error_count = 0;
@@ -29,14 +29,20 @@ module processor_tb_auto();
 	// wire [4:0] decode_ctrl_b = dut.my_processor.ctrl_readRegB;
 	// wire [31:0] q_dmem = dut.my_processor.q_dmem;
 
-	wire [4:0] ALU_op 	     = dut.my_processor.execute.ALU_op;
+	wire [31:0] insn_fd		= dut.my_processor.lfd.insn_in;
+	wire [31:0] insn_dx		= dut.my_processor.ldx.insn_in;
+	wire [31:0] insn_xm		= dut.my_processor.lxm.insn_in;
+	wire [31:0] insn_mw		= dut.my_processor.lmw.insn_in;
+
+	wire [4:0] opcode		= dut.my_processor.opcode;
+	wire [4:0] ALU_op 	     = dut.my_processor.execute.ec.ALU_op;
 	wire [31:0] alu_operandA = dut.my_processor.execute.ALU_operandA;
 	wire [31:0] alu_operandB = dut.my_processor.execute.ALU_operandB;
 	wire [31:0] alu_result = dut.my_processor.execute.o_out;
 	wire [31:0] exec_alu_operandB = dut.my_processor.execute.ec.ALU_operandB;
 
-	// wire [31:0] pc_pc_in = dut.my_processor.latch_pc_pc_in;
-	// wire [31:0] pc_pc_out = dut.my_processor.latch_pc_pc_out;
+	wire [31:0] pc_in = dut.my_processor.pc_in;
+	wire [31:0] pc_out = dut.my_processor.pc_out;
 	wire [31:0] q_dmem = dut.my_processor.q_dmem;
 	// wire [31:0] decode_a_out = dut.my_processor.decode.a_out;
 	// wire [31:0] decode_b_out = dut.my_processor.decode.b_out;
@@ -59,7 +65,18 @@ module processor_tb_auto();
 	// Main: wait specified cycles, then perform tests
 	initial begin
 		$display($time, ":  << Starting Test >>\n");	
+
+
+		$monitor("clock %d, opcode: %b, pc_curr(out): %d, pc_next(in) %d\ninsn_fd: %d, insn_dx: %d, insn_xm: %d insn_mw: %d\nALU_op: %b, alu_opA: %d, alu_opB: %d alu_result: %d\n\n", clock, opcode, pc_out, pc_in, insn_fd, insn_dx, insn_xm, insn_mw, ALU_op, alu_operandA, alu_operandB, alu_operandB, exec_alu_operandB, alu_result);
+		
+		//$monitor("ALU_op: %b, alu_opA: %d, alu_opB: %d alu_result: %d", ALU_op, alu_operandA, alu_operandB, alu_operandB, exec_alu_operandB, alu_result);
+		
+		//$monitor("opcode: %b, pc_curr(out): %d, pc_next(in) %d", opcode, pc_out, pc_in);
+
+
 		#(20*(CYCLE_LIMIT+1.5))
+
+
 		performTests();		
 		$display($time, ":  << Test Complete >>");
 		$display("Errors: %d" , error_count);
@@ -97,13 +114,11 @@ module processor_tb_auto();
 	endtask
 
 	task performTests; begin
-		checkRegister(32'd30, 32'd1);
-		checkRegister(32'd2, 32'd0);
-		checkRegister(32'd3, 32'd0);
-		checkRegister(32'd4, 32'd1);
-		checkRegister(32'd5, 32'd1);
-		checkRegister(32'd6, 32'd1);
-		checkRegister(32'd7, 32'd1);
+		checkRegister(32'd1, 32'd3);
+		checkRegister(32'd4, 32'd2);
+		checkRegister(32'd5, 32'd2);
+		checkRegister(32'd6, 32'd2);
+		checkRegister(32'd3, 32'd5);
 	end endtask
 
 endmodule

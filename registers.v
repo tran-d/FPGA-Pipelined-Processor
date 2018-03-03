@@ -90,7 +90,7 @@ endmodule
 /*********************************************************/
 
 /* Used in regfile */
-module reg32(out, in, clock, writeEnable, reset);
+module reg32(in, clock, reset, writeEnable, out);
 
 		input clock, writeEnable, reset;
 		input [31:0] in;
