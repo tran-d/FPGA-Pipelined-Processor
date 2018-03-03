@@ -1,15 +1,17 @@
-module stage_memory(opcode, ALU_result, ALU_operandB, q_dmem, address_dmem, wren, d_dmem);
+module stage_memory(opcode, o_in, b_in, o_out, d_out, q_dmem, address_dmem, wren, d_dmem);
 
 	input [4:0] opcode;
 	input [31:0] q_dmem;								//	q_mem: output of dmem (lw)
-	input [31:0] ALU_result, ALU_operandB;		//	ALU_result is used to address into dmem
-	output [31:0] d_dmem;							//	d_dmem: data to write to dmem ($rd for sw)
+	input [31:0] o_in, b_in;						//	ALU_result is used to address into dmem
+	
+	output [31:0] d_dmem, o_out, d_out;							//	d_dmem: data to write to dmem ($rd for sw)
 	output [11:0] address_dmem;
 	output wren;
 	
-	
-	assign address_dmem[11:0] = ALU_result[11:0];
-	assign d_dmem[31:0] = ALU_operandB[31:0];
+	assign d_out = q_dmem;
+	assign o_out = o_in;
+	assign address_dmem[11:0] = o_in[11:0];
+	assign d_dmem[31:0] = b_in[31:0];
 	
 	memory_controls mc(opcode, wren);
 	

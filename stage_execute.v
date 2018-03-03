@@ -8,10 +8,9 @@ module stage_execute(
 	regfile_operandA,
 	regfile_operandB,
 	pc_plus_4,
-	pc_upper_5,
-	ALU_operandA, 
-	ALU_operandB,
-	ALU_result,
+	pc_upper_5, 
+	b_out,
+	o_out,
 	take_branch,
 	overflow,
 	pc_in
@@ -22,17 +21,17 @@ module stage_execute(
 	input [31:0] regfile_operandA, regfile_operandB, pc_plus_4;
 	input [26:0] target;
 	
-	output [31:0] ALU_result, ALU_operandA, ALU_operandB;
+	output [31:0] o_out, b_out;
 	output take_branch, overflow;
 	output [31:0] pc_in;
 
 	wire isNotEqual, isLessThan;
-		
+	wire [31:0] ALU_operandA;
 		
 	execute_controls ec(opcode, ALU_op, immediate, target, regfile_operandA, regfile_operandB, 
-					pc_plus_4, pc_upper_5, ALU_operandA, ALU_operandB,  isNotEqual, isLessThan, take_branch, pc_in);
+					pc_plus_4, pc_upper_5, ALU_operandA, b_out,  isNotEqual, isLessThan, take_branch, pc_in);
 		
-	alu my_alu(ALU_operandA, ALU_operandB, ALU_op, shamt, ALU_result, isNotEqual, isLessThan, overflow);
+	alu my_alu(ALU_operandA, b_out, ALU_op, shamt, o_out, isNotEqual, isLessThan, overflow);
 	
 
 endmodule

@@ -1,19 +1,19 @@
 module stage_write(
 	opcode, 
 	ALU_op, 
-	ALU_result,
+	o_in,
 	rd,	
 	pc_plus_4, 
 	pc_upper_5,
 	target,
-	q_dmem, 
+	d_in,  //q_dmem
 	exception, 
 	data_writeReg, 
 	data_writeStatusReg,
 	ctrl_writeReg);
 
 	input [4:0] opcode, ALU_op, rd, pc_upper_5;
-	input [31:0] ALU_result, pc_plus_4, q_dmem;
+	input [31:0] o_in, pc_plus_4, d_in;
 	input exception; 
 	input [26:0] target;
 	output [31:0] data_writeReg, data_writeStatusReg;
@@ -28,7 +28,7 @@ module stage_write(
 	
 	wire [31:0] intermediate;
 	
-	assign intermediate  	 	= lw 	? q_dmem	   : ALU_result;
+	assign intermediate  	 	= lw 	? d_in	   : o_in;
 	assign data_writeReg		   = jal ? pc_plus_4 : intermediate;		// lw, jal, ALU_result
 	assign data_writeStatusReg = write_rstatus_exception ? {{31{1'b0}}, exception} : {pc_upper_5, target};  // rstatus = T (setx) or exception (add, addi, sub, mul, div)
 	assign ctrl_writeReg 		= jal ? 5'b11111 : rd;

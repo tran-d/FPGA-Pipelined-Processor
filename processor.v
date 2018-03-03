@@ -111,7 +111,7 @@ module processor(
 	wire br, DMwe, ALUinB, Rwd, j, jr, jal;
 	
 	/* ALU wires */
-	wire [31:0] ALU_operandA, ALU_operandB, ALU_result;
+	wire [31:0] execute_b_out, execute_o_out, memory_o_out, memory_d_out;
 	wire take_branch, overflow;
 	
 	/* PC wire */
@@ -128,14 +128,14 @@ module processor(
 	
 	pc_module 		my_pc(pc_in, clock, reset, pc_ena, address_imem, pc_plus_4, pc_upper_5);
 	
-	stage_decode	sd(opcode, ALU_op, rd, rs, rt, ctrl_readRegA, ctrl_readRegB); 
+	stage_decode	decode(opcode, ALU_op, rd, rs, rt, ctrl_readRegA, ctrl_readRegB); 
 	
-	stage_execute	se(opcode, ALU_op, immediate, shamt, target, data_readRegA, data_readRegB, pc_plus_4, pc_upper_5, 
-								ALU_operandA, ALU_operandB, ALU_result, take_branch, overflow, pc_in);
+	stage_execute	execute(opcode, ALU_op, immediate, shamt, target, data_readRegA, data_readRegB, pc_plus_4, pc_upper_5, 
+								execute_b_out, execute_o_out, take_branch, overflow, pc_in);
 								
-	stage_memory   sm(opcode, ALU_result, ALU_operandB, q_dmem, address_dmem, wren, data);
+	stage_memory   memory(opcode, execute_o_out, execute_b_out, memory_o_out, memory_d_out, q_dmem, address_dmem, wren, data);
 	
-	stage_write		sw(opcode, ALU_op, ALU_result, rd, pc_plus_4, pc_upper_5, target, q_dmem, 
+	stage_write		writeback(opcode, ALU_op, execute_o_out, rd, pc_plus_4, pc_upper_5, target, q_dmem, 
 								overflow, data_writeReg, data_writeStatusReg, ctrl_writeReg);
 
 	
