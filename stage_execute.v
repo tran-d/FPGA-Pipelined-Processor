@@ -53,12 +53,11 @@ module execute_controls(insn, regfile_operandA, regfile_operandB, pc_plus_4, pc_
 	output [4:0] mux_ALU_op;
 	
 	/* Insn Controls */
-	wire [4:0] opcode, rd, ALU_op;
+	wire [4:0] opcode, ALU_op;
 	wire [16:0] immediate;
 	wire [26:0] target;
 	
 	assign opcode 		= insn[31:27];
-	assign rd 			= insn[26:22];
 	assign ALU_op 		= insn[6:2];
 	assign immediate 	= insn[16:0];
 	assign target 		= insn[26:0];

@@ -92,18 +92,18 @@ module processor(
 
 	/* YOUR CODE STARTS HERE */
 
-	wire [4:0] opcode, rd, rs, rt, shamt, ALU_op;
-	wire [16:0] immediate;
-	wire [26:0] target;
-	
-	assign opcode 		= q_imem[31:27];
-	assign rd 			= q_imem[26:22];
-	assign rs 			= q_imem[21:17];
-	assign rt 			= q_imem[16:12];
-	assign shamt 		= q_imem[11:7];
-	assign ALU_op 		= q_imem[6:2];
-	assign immediate 	= q_imem[16:0];
-	assign target 		= q_imem[26:0];
+//	wire [4:0] opcode, rd, rs, rt, shamt, ALU_op;
+//	wire [16:0] immediate;
+//	wire [26:0] target;
+//	
+//	assign opcode 		= q_imem[31:27];
+//	assign rd 			= q_imem[26:22];
+//	assign rs 			= q_imem[21:17];
+//	assign rt 			= q_imem[16:12];
+//	assign shamt 		= q_imem[11:7];
+//	assign ALU_op 		= q_imem[6:2];
+//	assign immediate 	= q_imem[16:0];
+//	assign target 		= q_imem[26:0];
 	
 	/************************   Initialize Control Signals & Wires  ****************************/
 	
@@ -122,7 +122,7 @@ module processor(
 	
 	wire [31:0] data_writeStatusReg;
 	
-	controls my_controls(opcode, ALU_op, ctrl_writeEnable, br, DMwe, ALUinB, Rwd, j, jr, jal);
+//	controls my_controls(opcode, ALU_op, ctrl_writeEnable, br, DMwe, ALUinB, Rwd, j, jr, jal);
 	
 	/******************************* Initialize Pipelines **********************************/
 	assign enable_pc = 1'b1;
@@ -163,8 +163,8 @@ module processor(
 	latch_MW       lmw(clock, reset, enable_mw, insn_xm_out, insn_mw_out, memory_o_out, memory_d_out, o_mw_out, d_mw_out);
 
 	
-	stage_write		writeback(opcode, ALU_op, o_mw_out, rd, pc_plus_1, pc_upper_5, target, d_mw_out, 
-								overflow, data_writeReg, data_writeStatusReg, ctrl_writeReg);
+	stage_write		writeback(insn_mw_out, o_mw_out, d_mw_out, pc_plus_1, pc_upper_5, overflow, 			// inputs
+									data_writeReg, data_writeStatusReg, ctrl_writeReg, ctrl_writeEnable);		// outputs
 
 	
 	
