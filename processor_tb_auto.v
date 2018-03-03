@@ -6,7 +6,7 @@
   
 module processor_tb_auto();
 
-	integer CYCLE_LIMIT = 11; // Modify this to change number of cycles run during test
+	integer CYCLE_LIMIT = 9; // Modify this to change number of cycles run during test
 
 	reg clock = 0, reset = 0;
 	integer cycle_count = 0, error_count = 0;
@@ -39,6 +39,8 @@ module processor_tb_auto();
 	wire [31:0] memory_o_in = dut.my_processor.memory.o_in;
 	wire [31:0] memory_b_in = dut.my_processor.memory.b_in;
 	wire [31:0] memory_o_out = dut.my_processor.memory.o_out;
+	wire [11:0] memory_address = dut.my_processor.memory.address_dmem;
+	wire [31:0] q_dmem = dut.my_processor.memory.q_dmem;
 	wire [31:0] memory_d_out = dut.my_processor.memory.d_out;
 	wire [31:0] writeback_o_in = dut.my_processor.writeback.o_in;
 	wire [31:0] writeback_d_in = dut.my_processor.writeback.d_in;
@@ -72,8 +74,11 @@ module processor_tb_auto();
 			if(dut.my_regfile.register_output[reg_num] !== expected_value) begin
 				$display("ERROR: register $%d (expected: %h, read: %h)", reg_num, expected_value, dut.my_regfile.register_output[reg_num]);
 				$display("Execute_o_out: %d, Execute_b_out: %d", execute_o_out, execute_b_out);
+				
 				$display("Memory_o_in: %d, Memory_d_in: %d", memory_o_in, memory_b_in);
+				$display("Memory_address: %d, q_dmem: %d", memory_address, q_dmem);
 				$display("Memory_o_out: %d, Memory_d_out: %d", memory_o_out, memory_d_out);
+				
 				$display("Write_o_in: %d, Write_d_in: %d", writeback_o_in, writeback_d_in);
 				error_count = error_count + 1;
 			end

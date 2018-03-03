@@ -10,8 +10,8 @@ module stage_memory(opcode, o_in, b_in, o_out, d_out, q_dmem, address_dmem, wren
 	
 	assign d_out = q_dmem;
 	assign o_out = o_in;
-	assign address_dmem[11:0] = o_in[11:0];
-	assign d_dmem[31:0] = b_in[31:0];
+	assign address_dmem = o_in[11:0];
+	assign d_dmem = b_in;
 	
 	memory_controls mc(opcode, wren);
 	
