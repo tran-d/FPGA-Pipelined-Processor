@@ -115,9 +115,9 @@ module processor(
 	wire take_branch, overflow;
 	
 	/* PC wire */
-	wire [31:0] pc_in, pc_plus_4;
+	wire [31:0] pc_in, pc_plus_1;
 	wire [4:0] pc_upper_5;
-	wire pc_ena;
+	wire enable_pc, enable_fd, enable_dx, enable_xm, enable_mw;
 	wire [31:0] pc_out;
 	
 	wire [31:0] data_writeStatusReg;
@@ -125,18 +125,43 @@ module processor(
 	controls my_controls(opcode, ALU_op, ctrl_writeEnable, br, DMwe, ALUinB, Rwd, j, jr, jal);
 	
 	/******************************* Initialize Pipelines **********************************/
-	assign pc_ena = 1'b1;
+	assign enable_pc = 1'b1;
+	assign enable_fd = 1'b1;
+	assign enable_dx = 1'b1;
+	assign enable_xm = 1'b1;
+	assign enable_mw = 1'b1;
 	
-	pc_module 		my_pc(pc_in, clock, reset, pc_ena, address_imem, pc_plus_4, pc_upper_5, pc_out);
+	latch_PC 		lpc(clock, reset, enable_pc, pc_in, pc_out);
+	
+	
+	stage_fetch    fetch(pc_out, address_imem, pc_plus_1, pc_upper_5);
+	
+
+	latch_FD			lfd(clock, reset, enable_fd, pc_plus_1, q_imem, pc_fd_out, insn_fd_out);
+
 	
 	stage_decode	decode(opcode, ALU_op, rd, rs, rt, ctrl_readRegA, ctrl_readRegB); 
+
 	
-	stage_execute	execute(opcode, ALU_op, immediate, shamt, target, data_readRegA, data_readRegB, pc_plus_4, pc_upper_5, 
-								execute_b_out, execute_o_out, take_branch, overflow, pc_in, pc_out);
-								
-	stage_memory   memory(opcode, execute_o_out, execute_b_out, memory_o_out, memory_d_out, q_dmem, address_dmem, wren, d_dmem);
+	latch_DX			ldx(clock, reset, enable_dx, pc_fd_out, insn_fd_out, pc_dx_out, insn_dx_out, data_readRegA, data_readRegB, a_dx_out, b_dx_out);
+
 	
-	stage_write		writeback(opcode, ALU_op, memory_o_out, rd, pc_plus_4, pc_upper_5, target, q_dmem, 
+	stage_execute	execute(opcode, ALU_op, immediate, shamt, target, data_readRegA, data_readRegB, pc_plus_1, pc_upper_5, 
+
+	
+	execute_b_out, execute_o_out, take_branch, overflow, pc_in, pc_out);			
+	
+	
+	latch_XM       lxm(clock, reset, enable_xm, insn_dx_out, insn_xm_out, execute_o_out, execute_b_out, o_xm_out, b_xm_out);
+	
+	
+	stage_memory   memory(opcode, o_xm_out, b_xm_out, memory_o_out, memory_d_out, q_dmem, address_dmem, wren, d_dmem);
+
+	
+	latch_MW       lmw(clock, reset, enable_mw, insn_xm_out, insn_mw_out, memory_o_out, memory_d_out, o_mx_out, d_mw_out);
+
+	
+	stage_write		writeback(opcode, ALU_op, o_mx_out, rd, pc_plus_1, pc_upper_5, target, d_mw_out, 
 								overflow, data_writeReg, data_writeStatusReg, ctrl_writeReg);
 
 	

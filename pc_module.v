@@ -2,6 +2,7 @@ module pc_module(pc_in, clock, reset, pc_ena, address_imem, pc_plus_4, pc_upper_
 
 	input [31:0] pc_in;
 	input clock, reset, pc_ena;
+	
 	output [31:0] pc_plus_4;
 	output [11:0] address_imem;
 	output [4:0] pc_upper_5;
@@ -43,3 +44,5 @@ module pc_reg(in, clock, reset, ena, out);
 endmodule
 
 /***************************************************************************************************/
+
+

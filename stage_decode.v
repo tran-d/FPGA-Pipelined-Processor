@@ -22,7 +22,7 @@ module decode_controls(opcode, ALU_op, rd, rs, rt, ctrl_readRegA, ctrl_readRegB)
 	input [4:0] opcode, ALU_op, rd, rs, rt;
 	output [4:0]  ctrl_readRegA, ctrl_readRegB;
 	
-	wire r_insn;
+	wire r_insn, bex;
 	assign r_insn 		= ~opcode[4] & ~opcode[3] & ~opcode[2] & ~opcode[1] & ~opcode[0];
 	assign bex			=  opcode[4] & ~opcode[3] &  opcode[2] &  opcode[1] & ~opcode[0];	//10110
 	
