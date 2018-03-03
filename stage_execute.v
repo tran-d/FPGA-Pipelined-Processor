@@ -13,12 +13,13 @@ module stage_execute(
 	o_out,
 	take_branch,
 	overflow,
-	pc_in
+	pc_in,
+	pc_out
 	);
 
 	input [4:0] opcode, ALU_op, shamt, pc_upper_5;
 	input [16:0] immediate;
-	input [31:0] regfile_operandA, regfile_operandB, pc_plus_4;
+	input [31:0] regfile_operandA, regfile_operandB, pc_plus_4, pc_out;
 	input [26:0] target;
 	
 	output [31:0] o_out, b_out;
@@ -32,7 +33,7 @@ module stage_execute(
 
 		
 	execute_controls ec(opcode, ALU_op, immediate, target, regfile_operandA, regfile_operandB, 
-					pc_plus_4, pc_upper_5, ALU_operandA, ALU_operandB, isNotEqual, isLessThan, take_branch, pc_in, mux_ALU_op);
+					pc_plus_4, pc_upper_5, ALU_operandA, ALU_operandB, isNotEqual, isLessThan, take_branch, pc_in, pc_out, mux_ALU_op);
 		
 	alu my_alu(ALU_operandA, ALU_operandB, mux_ALU_op, shamt, o_out, isNotEqual, isLessThan, overflow);
 	
@@ -43,11 +44,11 @@ endmodule
 
 
 module execute_controls(opcode, ALU_op, immediate, target, regfile_operandA, regfile_operandB, 
-					pc_plus_4, pc_upper_5, ALU_operandA, ALU_operandB, isNotEqual, isLessThan, take_branch, pc_in, mux_ALU_op);
+					pc_plus_4, pc_upper_5, ALU_operandA, ALU_operandB, isNotEqual, isLessThan, take_branch, pc_in, pc_out, mux_ALU_op);
 
 	input [4:0] opcode, ALU_op, pc_upper_5;
 	input [26:0] target;
-	input [31:0] regfile_operandA, regfile_operandB, pc_plus_4; 
+	input [31:0] regfile_operandA, regfile_operandB, pc_plus_4, pc_out; 
 	input [16:0] immediate;
 	input  isNotEqual, isLessThan;
 	

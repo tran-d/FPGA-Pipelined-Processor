@@ -118,6 +118,7 @@ module processor(
 	wire [31:0] pc_in, pc_plus_4;
 	wire [4:0] pc_upper_5;
 	wire pc_ena;
+	wire [31:0] pc_out;
 	
 	wire [31:0] data_writeStatusReg;
 	
@@ -126,12 +127,12 @@ module processor(
 	/******************************* Initialize Pipelines **********************************/
 	assign pc_ena = 1'b1;
 	
-	pc_module 		my_pc(pc_in, clock, reset, pc_ena, address_imem, pc_plus_4, pc_upper_5);
+	pc_module 		my_pc(pc_in, clock, reset, pc_ena, address_imem, pc_plus_4, pc_upper_5, pc_out);
 	
 	stage_decode	decode(opcode, ALU_op, rd, rs, rt, ctrl_readRegA, ctrl_readRegB); 
 	
 	stage_execute	execute(opcode, ALU_op, immediate, shamt, target, data_readRegA, data_readRegB, pc_plus_4, pc_upper_5, 
-								execute_b_out, execute_o_out, take_branch, overflow, pc_in);
+								execute_b_out, execute_o_out, take_branch, overflow, pc_in, pc_out);
 								
 	stage_memory   memory(opcode, execute_o_out, execute_b_out, memory_o_out, memory_d_out, q_dmem, address_dmem, wren, d_dmem);
 	

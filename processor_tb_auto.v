@@ -6,7 +6,7 @@
   
 module processor_tb_auto();
 
-	integer CYCLE_LIMIT = 3; // Modify this to change number of cycles run during test
+	integer CYCLE_LIMIT = 5; // Modify this to change number of cycles run during test
 
 	reg clock = 0, reset = 0;
 	integer cycle_count = 0, error_count = 0;
@@ -97,10 +97,9 @@ module processor_tb_auto();
 	endtask
 
 	task performTests; begin
-		checkRegister(32'd6, 32'd3);
-		checkRegister(32'd7, -32'd4);
-		checkRegister(32'd8, 32'd5);
-		checkRegister(32'd9, 32'd6);
+		checkRegister(32'd1, 32'd0);
+		checkRegister(32'd7, 32'd14);
+		checkRegister(32'd11, 32'd14);
 	end endtask
 
 endmodule

@@ -1,4 +1,4 @@
-module pc_module(pc_in, clock, reset, pc_ena, address_imem, pc_plus_4, pc_upper_5);
+module pc_module(pc_in, clock, reset, pc_ena, address_imem, pc_plus_4, pc_upper_5, pc_out);
 
 	input [31:0] pc_in;
 	input clock, reset, pc_ena;
@@ -8,7 +8,7 @@ module pc_module(pc_in, clock, reset, pc_ena, address_imem, pc_plus_4, pc_upper_
 	
 	
 
-	wire [31:0] pc_out;
+	output [31:0] pc_out;
 	
 	assign address_imem[11:0] = pc_out[11:0];
 	
