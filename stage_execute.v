@@ -37,15 +37,6 @@ module stage_execute(
 
 endmodule
 
-module pc_controls(opcode, pc_in);
-
-	input [4:0] opcode;
-	output [31:0] pc_in;
-	
-	
-
-endmodule
-
 
 module execute_controls(opcode, ALU_op, immediate, target, regfile_operandA, regfile_operandB, 
 					pc_plus_4, pc_upper_5, ALU_operandA, ALU_operandB,  isNotEqual, isLessThan, take_branch, pc_in);

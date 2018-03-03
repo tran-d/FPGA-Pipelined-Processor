@@ -6,7 +6,7 @@
   
 module processor_tb_auto();
 
-	integer CYCLE_LIMIT = 1; // Modify this to change number of cycles run during test
+	integer CYCLE_LIMIT = 5; // Modify this to change number of cycles run during test
 
 	reg clock = 0, reset = 0;
 	integer cycle_count = 0, error_count = 0;
@@ -70,17 +70,18 @@ module processor_tb_auto();
 		input [31:0] expected_value;
 		begin
 			if(dut.my_regfile.register_output[reg_num] !== expected_value) begin
-				$display("Error: register $%d (expected: %h, read: %h)", reg_num, expected_value, dut.my_regfile.register_output[reg_num]);
+				$display("ERROR: register $%d (expected: %h, read: %h)", reg_num, expected_value, dut.my_regfile.register_output[reg_num]);
 				error_count = error_count + 1;
 			end
 			else
-				$display("Success! register $%d (expected: %h, read: %h)", reg_num, expected_value, dut.my_regfile.register_output[reg_num]);
-				
+				$display("\t\t\t\t Success! register $%d (expected: %h, read: %h)", reg_num, expected_value, dut.my_regfile.register_output[reg_num]);
 		end
 	endtask
 
 	task performTests; begin
-		checkRegister(32'd1, 32'd2);
+		checkRegister(32'd2, 32'd2);
+		checkRegister(32'd1, 32'd3);
+		checkRegister(32'd3, 32'd5);
 	end endtask
 
 endmodule

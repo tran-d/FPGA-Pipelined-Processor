@@ -18,7 +18,9 @@ module pc_module(pc_in, clock, reset, pc_ena, address_imem, pc_plus_4, pc_upper_
 	pc_reg my_PC(pc_in, clock, reset, pc_ena, pc_out);
 //	reg32 my_pc_reg(pc_in, clock, reset, pc_ena, pc_out);
 	
-	adder32 my_adder32(pc_out, {{29{1'b0}}, 1'b1, 2'b00}, 1'b0, pc_plus_4, dovf, dne, dlt);
+	adder32 my_adder32(pc_out, 32'd0, 1'b1, pc_plus_4, dovf, dne, dlt);
+
+//	adder32 my_adder32(pc_out, {{29{1'b0}}, 1'b1, 2'b00}, 1'b0, pc_plus_4, dovf, dne, dlt);
 
 	assign pc_upper_5[4:0] = pc_out[31:27];
 	
