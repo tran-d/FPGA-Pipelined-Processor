@@ -116,7 +116,7 @@ module processor(
 	wire take_branch, overflow;
 	
 	/* PC wire */
-	wire [31:0] pc_in, pc_out, exec_pc_out, pc_plus_1;
+	wire [31:0] pc_in, pc_out, exec_pc_out;
 	wire [4:0] pc_upper_5;
 	wire enable_pc, enable_fd, enable_dx, enable_xm, enable_mw, j_took_branch;
 	
@@ -140,25 +140,23 @@ module processor(
 	latch_PC 		lpc(clock, reset, ~data_hazard, pc_in, pc_out);
 	
 	
-	stage_fetch    fetch(pc_out, exec_pc_out, j_took_branch, address_imem, pc_plus_1, pc_upper_5, pc_in);
+	stage_fetch    fetch(pc_out, exec_pc_out, j_took_branch, address_imem, pc_upper_5, pc_in);
 
 	wire [31:0] insn_fd_in;
 	assign insn_fd_in = j_took_branch ? 32'd0 : q_imem;
 	
-	wire [31:0] pc_fd_out1;
-	latch_FD			lfd(clock, reset, ~data_hazard, pc_out, pc_fd_out1, pc_plus_1, insn_fd_in, pc_fd_out, insn_fd_out);
+	latch_FD			lfd(clock, reset, ~data_hazard, pc_out, insn_fd_in, pc_fd_out, insn_fd_out);
 	
-
 	stage_decode	decode(insn_fd_out, ctrl_readRegA, ctrl_readRegB); 
 
 	
 	wire [31:0] insn_dx_in;
 	wire [31:0] pc_dx_out1;
 	assign insn_dx_in = (j_took_branch | data_hazard ) ? 32'd0 : insn_fd_out;
-	latch_DX			ldx(clock, reset, enable_dx, pc_fd_out1, pc_dx_out1, pc_fd_out, insn_dx_in, pc_dx_out, insn_dx_out, data_readRegA, data_readRegB, a_dx_out, b_dx_out);
+	latch_DX			ldx(clock, reset, enable_dx, pc_fd_out, insn_dx_in, pc_dx_out, insn_dx_out, data_readRegA, data_readRegB, a_dx_out, b_dx_out);
 
 	
-	stage_execute	execute(insn_dx_out, a_dx_out, b_dx_out, pc_dx_out, pc_upper_5, pc_dx_out1, 		// inputs
+	stage_execute	execute(insn_dx_out, a_dx_out, b_dx_out, pc_upper_5, pc_dx_out, 		// inputs
 								execute_o_out, execute_b_out, take_branch, exec_write_exception, exec_pc_out, j_took_branch);			// outputs
 	
 

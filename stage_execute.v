@@ -4,7 +4,6 @@ module stage_execute(
 	insn,
 	regfile_operandA,
 	regfile_operandB,
-	pc_plus_1,
 	pc_upper_5,
 	pc_out,
 
@@ -17,7 +16,7 @@ module stage_execute(
 	j_took_branch);
 
 	input [4:0] pc_upper_5;
-	input [31:0] insn, regfile_operandA, regfile_operandB, pc_plus_1, pc_out;
+	input [31:0] insn, regfile_operandA, regfile_operandB, pc_out;
 	
 	output [31:0] o_out, b_out;
 	output take_branch, write_exception, j_took_branch; // might need this
@@ -31,9 +30,9 @@ module stage_execute(
 	
 	assign shamt = insn[11:7];
 		
-	execute_controls ec(insn, regfile_operandA, regfile_operandB, pc_plus_1, pc_upper_5, exception,
+	execute_controls ec(insn, regfile_operandA, regfile_operandB, pc_out, pc_upper_5, exception,
 								ALU_operandA, ALU_operandB, ALU_result, isNotEqual, isLessThan, take_branch, pc_in, mux_ALU_op, 
-								j_took_branch, o_out, write_exception, pc_out);
+								j_took_branch, o_out, write_exception);
 		
 	alu my_alu(ALU_operandA, ALU_operandB, mux_ALU_op, shamt, ALU_result, isNotEqual, isLessThan, exception);
 	
@@ -43,12 +42,12 @@ module stage_execute(
 endmodule
 
 
-module execute_controls(insn, regfile_operandA, regfile_operandB, pc_plus_1, pc_upper_5, exception,
+module execute_controls(insn, regfile_operandA, regfile_operandB, pc_out, pc_upper_5, exception,
 							ALU_operandA, ALU_operandB, ALU_result, isNotEqual, isLessThan, take_branch, pc_in, mux_ALU_op, 
-							j_took_branch, o_out, write_exception, pc_out);
+							j_took_branch, o_out, write_exception);
 
 	input [4:0] pc_upper_5;
-	input [31:0] insn, regfile_operandA, regfile_operandB, ALU_result, pc_plus_1, pc_out; 
+	input [31:0] insn, regfile_operandA, regfile_operandB, ALU_result, pc_out; 
 	input  isNotEqual, isLessThan, exception;
 	
 	output [31:0] ALU_operandA, ALU_operandB, pc_in, o_out;

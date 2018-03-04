@@ -43,10 +43,11 @@ module write_controls(insn, lw, jal, setx, ctrl_writeEnable);
 	wire add, addi, sub, mul, div, custom_r;
 	wire r_insn;
 	wire ALU_add, ALU_sub, ALU_mul, ALU_div;
-	wire [4:0] opcode, ALU_op;
+	wire [4:0] opcode;
+//	wire [4:0] ALU_op;
 	
 	assign opcode 		= insn[31:27];
-	assign ALU_op 		= insn[6:2];
+//	assign ALU_op 		= insn[6:2];
 	
 	assign r_insn 		= ~opcode[4] & ~opcode[3] & ~opcode[2] & ~opcode[1] & ~opcode[0];
 
