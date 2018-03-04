@@ -34,7 +34,7 @@ module latch_DX(clock, reset, enable, pc_plus_1_in, insn_in, pc_plus_1_out, insn
 
 endmodule
 
-module latch_XM(clock, reset, write_exception_in, write_exception_out, enable, insn_in, insn_out, o_in, b_in, o_out, b_out);
+module latch_XM(clock, reset,  enable, write_exception_in, write_exception_out,insn_in, insn_out, o_in, b_in, o_out, b_out);
 
 	input  [31:0] insn_in, o_in, b_in;
 	input  clock, reset, enable, write_exception_in;

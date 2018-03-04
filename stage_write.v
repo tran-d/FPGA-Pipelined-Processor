@@ -4,9 +4,7 @@ module stage_write(
 	o_in,	
 	d_in,  //q_dmem
 	write_exception,
-	
 	data_writeReg, 
-	data_writeStatusReg,
 	ctrl_writeReg,
 	ctrl_writeEnable
 	);
@@ -18,9 +16,9 @@ module stage_write(
 	output ctrl_writeEnable;
 	
 	
-	wire write_rstatus_exception, lw, jal, setx;
+	wire lw, jal, setx;
 	
-	write_controls	wc(insn, write_rstatus_exception, lw, jal, setx, ctrl_writeEnable);
+	write_controls	wc(insn, lw, jal, setx, ctrl_writeEnable);
 	
 	wire [4:0] rd;
 
@@ -37,10 +35,10 @@ module stage_write(
 	
 endmodule
 
-module write_controls(insn, write_rstatus_exception, lw, jal, setx, ctrl_writeEnable);
+module write_controls(insn, lw, jal, setx, ctrl_writeEnable);
 	
 	input [31:0] insn;
-	output write_rstatus_exception, lw, jal, ctrl_writeEnable, setx;
+	output lw, jal, ctrl_writeEnable, setx;
 	
 	wire add, addi, sub, mul, div, custom_r;
 	wire r_insn;

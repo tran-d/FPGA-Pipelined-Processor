@@ -170,7 +170,7 @@ module processor(
 
 
 	stage_write		writeback(insn_mw_out, o_mw_out, d_mw_out, mw_write_exception, 			// inputs
-									data_writeReg, data_writeStatusReg, ctrl_writeReg, ctrl_writeEnable);		// outputs
+									data_writeReg, ctrl_writeReg, ctrl_writeEnable);		// outputs
 	
 	
 	/* Data Hazards */
