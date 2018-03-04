@@ -135,21 +135,24 @@ module processor(
 	wire [31:0] pc_fd_out, pc_dx_out;
 	wire [31:0] insn_fd_out, insn_dx_out, insn_mw_out, insn_xm_out;
 	wire [31:0] a_dx_out, b_dx_out, o_xm_out, b_xm_out, o_mw_out, d_mw_out;
+	wire data_hazard;
 	
 	
-	latch_PC 		lpc(clock, reset, enable_pc, pc_in, pc_out);
+	latch_PC 		lpc(clock, reset, ~data_hazard, pc_in, pc_out);
 	
 	
 	stage_fetch    fetch(pc_out, address_imem, pc_plus_1, pc_upper_5);
 
 	
-	latch_FD			lfd(clock, reset, enable_fd, pc_plus_1, q_imem, pc_fd_out, insn_fd_out);
-
+	latch_FD			lfd(clock, reset, ~data_hazard, pc_plus_1, q_imem, pc_fd_out, insn_fd_out);
+	
 
 	stage_decode	decode(insn_fd_out, ctrl_readRegA, ctrl_readRegB); 
 
 	
-	latch_DX			ldx(clock, reset, enable_dx, pc_fd_out, insn_fd_out, pc_dx_out, insn_dx_out, data_readRegA, data_readRegB, a_dx_out, b_dx_out);
+	wire [31:0] insn_dx_in;
+	assign insn_dx_in = data_hazard ? 32'd0 : insn_fd_out;
+	latch_DX			ldx(clock, reset, enable_dx, pc_fd_out, insn_dx_in, pc_dx_out, insn_dx_out, data_readRegA, data_readRegB, a_dx_out, b_dx_out);
 
 	
 	stage_execute	execute(insn_dx_out, a_dx_out, b_dx_out, pc_plus_1, pc_upper_5,  		// inputs
@@ -167,6 +170,10 @@ module processor(
 
 	stage_write		writeback(insn_mw_out, o_mw_out, d_mw_out, pc_plus_1, pc_upper_5, overflow, 			// inputs
 									data_writeReg, data_writeStatusReg, ctrl_writeReg, ctrl_writeEnable);		// outputs
+	
+	
+	/* Data Hazards */
+	data_hazard_control dhc(insn_fd_out, insn_dx_out, insn_xm_out, data_hazard);
 	
 	
 	/* Single Cycle */

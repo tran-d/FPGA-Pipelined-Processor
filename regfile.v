@@ -42,9 +42,9 @@ module regfile (
 			
 			/***** create 32-bit register *****/
 			if(i==0)
-				reg32 myregisterZero(32'b0, clock, ctrl_reset, 1'b0, register_output[i]);
+				reg32_neg myregisterZero(32'b0, clock, ctrl_reset, 1'b0, register_output[i]);
 			else
-				reg32     myregister(data_writeReg, clock, ctrl_reset, reg_writeEnable[i], register_output[i]);
+				reg32_neg     myregister(data_writeReg, clock, ctrl_reset, reg_writeEnable[i], register_output[i]);
 			
 			for(j=0; j<32; j=j+1) begin: transpose
 			

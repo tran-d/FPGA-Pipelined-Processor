@@ -1,10 +1,9 @@
-module data_hazard_control(fd_insn, dx_insn, xm_insn); // dont need register, can parse itself
+module data_hazard_control(fd_insn, dx_insn, xm_insn, is_data_hazard); // dont need register, can parse itself
 
 	input [31:0] fd_insn, dx_insn, xm_insn;
+	output is_data_hazard;
 	
-	wire is_data_hazard;
 	wire [4:0] fd_rs1_equals_dx_rd, fd_rs2_equals_dx_rd, fd_rs1_equals_xm_rd, fd_rs2_equals_xm_rd;
-
 
 	wire [4:0] fd_opcode, dx_opcode, xm_opcode;
 	wire fd_only_rs_insn, dx_only_rs_insn, xm_only_rs_insn;
