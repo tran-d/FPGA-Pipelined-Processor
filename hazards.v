@@ -19,41 +19,35 @@ module data_hazard_control(fd_insn, dx_insn, xm_insn, is_data_hazard); // dont n
 	assign xm_opcode 	= xm_insn[31:27];
 	
 	// will need to add special case for lw, sw
-	assign fd_r_insn 			=  (~fd_opcode[4] & ~fd_opcode[3] & ~fd_opcode[2] & ~fd_opcode[1] & ~fd_opcode[0]); 	// r_insn
+	assign fd_r_insn 			=  (~fd_opcode[4] && ~fd_opcode[3] && ~fd_opcode[2] && ~fd_opcode[1] && ~fd_opcode[0]); 	// r_insn
 	
-	assign fd_addi_insn 		=	(~fd_opcode[4] & ~fd_opcode[3] &  fd_opcode[2] & ~fd_opcode[1] &  fd_opcode[0]); 	//00101 addi
-	assign fd_lw_insn			=	(~fd_opcode[4] &  fd_opcode[3] & ~fd_opcode[2] & ~fd_opcode[1] & ~fd_opcode[0]);		//01000 lw only check fd_rs1				
+	assign fd_addi_insn 		=	(~fd_opcode[4] && ~fd_opcode[3] &&  fd_opcode[2] && ~fd_opcode[1] &&  fd_opcode[0]); 	//00101 addi
+	assign fd_lw_insn			=	(~fd_opcode[4] &&  fd_opcode[3] && ~fd_opcode[2] && ~fd_opcode[1] && ~fd_opcode[0]);		//01000 lw only check fd_rs1				
 	assign fd_read_rs_insn 	= fd_addi_insn | fd_lw_insn;
 	 
-	assign fd_sw_insn 		=  (~fd_opcode[4] & ~fd_opcode[3] &  fd_opcode[2] &  fd_opcode[1] &  fd_opcode[0]);	//00111 sw only check (lw followed by lw/sw/etc)
-	assign fd_bne_insn 		= 	(~fd_opcode[4] & ~fd_opcode[3] & ~fd_opcode[2] &  fd_opcode[1] & ~fd_opcode[0]);	//00010
-	assign fd_blt_insn		=  (~fd_opcode[4] & ~fd_opcode[3] &  fd_opcode[2] &  fd_opcode[1] & ~fd_opcode[0]);	//00110
+	assign fd_sw_insn 		=  (~fd_opcode[4] && ~fd_opcode[3] &&  fd_opcode[2] &&  fd_opcode[1] &&  fd_opcode[0]);	//00111 sw only check (lw followed by lw/sw/etc)
+	assign fd_bne_insn 		= 	(~fd_opcode[4] && ~fd_opcode[3] && ~fd_opcode[2] &&  fd_opcode[1] && ~fd_opcode[0]);	//00010
+	assign fd_blt_insn		=  (~fd_opcode[4] && ~fd_opcode[3] &&  fd_opcode[2] &&  fd_opcode[1] && ~fd_opcode[0]);	//00110
 	assign fd_read_rs_rd_insn = fd_sw_insn | fd_bne_insn | fd_blt_insn;
 	
-	assign fd_jr_insn			=  (~fd_opcode[4] & ~fd_opcode[3] &  fd_opcode[2] & ~fd_opcode[1] & ~fd_opcode[0]);	//00100
-	assign fd_bex_insn		=  ( fd_opcode[4] & ~fd_opcode[3] &  fd_opcode[2] &  fd_opcode[1] & ~fd_opcode[0]);
+	assign fd_jr_insn			=  (~fd_opcode[4] && ~fd_opcode[3] &&  fd_opcode[2] && ~fd_opcode[1] && ~fd_opcode[0]);	//00100
+	assign fd_bex_insn		=  ( fd_opcode[4] && ~fd_opcode[3] &&  fd_opcode[2] &&  fd_opcode[1] && ~fd_opcode[0]);
 	
-	// specials
-	// ~opcode[4] & ~opcode[3] & ~opcode[2] &  opcode[1] &  opcode[0];	//00011 jal only check $rstatus
-	// ~opcode[4] & ~opcode[3] &  opcode[2] &  opcode[1] &  opcode[0];	//00111 sw only check (lw followed by lw/sw/etc)
-	// (~fd_opcode[4] &  fd_opcode[3] & ~fd_opcode[2] & ~fd_opcode[1] & ~fd_opcode[0]) ||	//01000 lw only check fd_rs1
-	// opcode[4] & ~opcode[3] &  opcode[2] & ~opcode[1] &  opcode[0];	//10101 setx check if reading from $rstatus 
-	
-	assign dx_r_insn 			=  (~dx_opcode[4] & ~dx_opcode[3] & ~dx_opcode[2] & ~dx_opcode[1] & ~dx_opcode[0]); 	// r_insn
-	assign dx_addi_insn 		=  (~dx_opcode[4] & ~dx_opcode[3] &  dx_opcode[2] & ~dx_opcode[1] &  dx_opcode[0]); 	// addi
-	assign dx_lw_insn			=	(~dx_opcode[4] &  dx_opcode[3] & ~dx_opcode[2] & ~dx_opcode[1] & ~dx_opcode[0]);		//01000 lw only check fd_rs1				
+	assign dx_r_insn 			=  (~dx_opcode[4] && ~dx_opcode[3] && ~dx_opcode[2] && ~dx_opcode[1] && ~dx_opcode[0]); 	// r_insn
+	assign dx_addi_insn 		=  (~dx_opcode[4] && ~dx_opcode[3] &&  dx_opcode[2] && ~dx_opcode[1] &&  dx_opcode[0]); 	// addi
+	assign dx_lw_insn			=	(~dx_opcode[4] &&  dx_opcode[3] && ~dx_opcode[2] && ~dx_opcode[1] && ~dx_opcode[0]);		//01000 lw only check fd_rs1				
 	assign dx_write_insn 	=  dx_r_insn || dx_addi_insn || dx_lw_insn;
 	
-	assign dx_jal_insn		= 	(~dx_opcode[4] & ~dx_opcode[3] & ~dx_opcode[2] &  dx_opcode[1] &  dx_opcode[0]);	//00011 jal only check $r31
-	assign dx_setx_insn		=  ( dx_opcode[4] & ~dx_opcode[3] &  dx_opcode[2] & ~dx_opcode[1] &  dx_opcode[0]);	//10110
+	assign dx_jal_insn		= 	(~dx_opcode[4] && ~dx_opcode[3] && ~dx_opcode[2] &&  dx_opcode[1] &&  dx_opcode[0]);	//00011 jal only check $r31
+	assign dx_setx_insn		=  ( dx_opcode[4] && ~dx_opcode[3] &&  dx_opcode[2] && ~dx_opcode[1] &&  dx_opcode[0]);	//10110
 						
-	assign xm_r_insn 			=  (~xm_opcode[4] & ~xm_opcode[3] & ~xm_opcode[2] & ~xm_opcode[1] & ~xm_opcode[0]); 	// r_insn
-	assign xm_addi_insn 		=	(~xm_opcode[4] & ~xm_opcode[3] &  xm_opcode[2] & ~xm_opcode[1] &  xm_opcode[0]);		// addit
-	assign xm_lw_insn			=	(~xm_opcode[4] &  xm_opcode[3] & ~xm_opcode[2] & ~xm_opcode[1] & ~xm_opcode[0]);		//01000 lw only check fd_rs1				
+	assign xm_r_insn 			=  (~xm_opcode[4] && ~xm_opcode[3] && ~xm_opcode[2] && ~xm_opcode[1] && ~xm_opcode[0]); 	// r_insn
+	assign xm_addi_insn 		=	(~xm_opcode[4] && ~xm_opcode[3] &&  xm_opcode[2] && ~xm_opcode[1] &&  xm_opcode[0]);		// addit
+	assign xm_lw_insn			=	(~xm_opcode[4] &&  xm_opcode[3] && ~xm_opcode[2] && ~xm_opcode[1] && ~xm_opcode[0]);		//01000 lw only check fd_rs1				
 	assign xm_write_insn 	=  xm_r_insn || xm_addi_insn || xm_lw_insn;	
 		
-	assign xm_jal_insn		= 	(~xm_opcode[4] & ~xm_opcode[3] & ~xm_opcode[2] &  xm_opcode[1] &  xm_opcode[0]);	//00011 jal only check $r31
-	assign xm_setx_insn		=  ( xm_opcode[4] & ~xm_opcode[3] &  xm_opcode[2] & ~xm_opcode[1] &  xm_opcode[0]);	//10110
+	assign xm_jal_insn		= 	(~xm_opcode[4] && ~xm_opcode[3] && ~xm_opcode[2] &&  xm_opcode[1] &&  xm_opcode[0]);	//00011 jal only check $r31
+	assign xm_setx_insn		=  ( xm_opcode[4] && ~xm_opcode[3] &&  xm_opcode[2] && ~xm_opcode[1] &&  xm_opcode[0]);	//10110
 	
 	
 	
@@ -89,14 +83,14 @@ module data_hazard_control(fd_insn, dx_insn, xm_insn, is_data_hazard); // dont n
 		
 		xnor x10(fd_rs1_equals_r31[i], fd_rs1[i], r31[i]); 
 		xnor x11(fd_rs2_equals_r31[i], fd_rs2[i], r31[i]);
-		xnor x12(fd_rd_equals_r30[i],  fd_rd[i],  r30[i]);
+		xnor x12(fd_rd_equals_r31[i],  fd_rd[i],  r30[i]);
 	
 	end
 	endgenerate
 	
 	
 	wire fd_dx_dhaz_rs_rt, fd_xm_dhaz_rs_rt, fd_dx_dhaz_rs, fd_xm_dhaz_rs, fd_dx_dhaz_r30, fd_xm_dhaz_r30,
-			fd_dx_dhaz_r31, fd_xm_dhaz_r31, fd_dx_dhaz_rd_rs, fd_xm_dhaz_rd_rs, fd_dx_dhaz_rd, fd_xm_dhaz_rd;
+			fd_dhaz_r31, fd_dx_dhaz_rd_rs, fd_xm_dhaz_rd_rs, fd_dx_dhaz_rd, fd_xm_dhaz_rd;
 	
 	// RAW for r_insn ($rs , $rt)
 	assign fd_dx_dhaz_rs_rt = fd_r_insn && dx_write_insn && ((&fd_rs1_equals_dx_rd[4:0] && |fd_rs1[4:0]) || (&fd_rs2_equals_dx_rd[4:0] && |fd_rs2[4:0]));
@@ -114,19 +108,18 @@ module data_hazard_control(fd_insn, dx_insn, xm_insn, is_data_hazard); // dont n
 	assign fd_dx_dhaz_rd 	= fd_jr_insn && dx_write_insn && (&fd_rd_equals_dx_rd[4:0] && |fd_rd[4:0]);
 	assign fd_xm_dhaz_rd		= fd_jr_insn && xm_write_insn && (&fd_rd_equals_xm_rd[4:0] && |fd_rd[4:0]);
 	
-	
-	// RAW for insn using only $r30
+	// RAW for insn using only $r30 ... doesn't cover all cases
 	assign fd_dx_dhaz_r30 	= fd_bex_insn && dx_setx_insn;
 	assign fd_xm_dhaz_r30	= fd_bex_insn && xm_setx_insn;
 	
-	
 	// RAW for insn using $r31
-	assign fd_dx_dhaz_r31 	= fd_r_insn && dx_jal_insn && ((&fd_rs1_equals_dx_rd[4:0] && fd_rs1_equals_r31) || (&fd_rs2_equals_dx_rd[4:0] && fd_rs2_equals_r31));
-	assign fd_xm_dhaz_r31 	= fd_r_insn && xm_jal_insn && ((&fd_rs1_equals_xm_rd[4:0] && fd_rs1_equals_r31) || (&fd_rs2_equals_xm_rd[4:0] && fd_rs2_equals_r31));
-	
-	
-	
-	assign is_data_hazard = fd_dx_dhaz_rs_rt | fd_xm_dhaz_rs_rt | fd_dx_dhaz_rs | fd_xm_dhaz_rs |
-									fd_dx_dhaz_rd_rs | fd_xm_dhaz_rd_rs |fd_dx_dhaz_rd | fd_xm_dhaz_rd | fd_dx_dhaz_r30 | fd_xm_dhaz_r30;
+	assign fd_dhaz_r31 		= (xm_jal_insn || dx_jal_insn) && 
+														  (fd_r_insn && (&fd_rs1_equals_r31[4:0] || &fd_rs2_equals_r31[4:0])) ||
+														  (fd_read_rs_insn && &fd_rs1_equals_r31[4:0]) || 
+														  (fd_read_rs_rd_insn && (&fd_rs1_equals_r31[4:0] || (&fd_rd_equals_r31[4:0]))) ||
+														  (fd_jr_insn && (&fd_rd_equals_r31[4:0]));
+														  
+	assign is_data_hazard = fd_dx_dhaz_rs_rt || fd_xm_dhaz_rs_rt || fd_dx_dhaz_rs || fd_xm_dhaz_rs || fd_dhaz_r31 || 
+									fd_dx_dhaz_rd_rs || fd_xm_dhaz_rd_rs || fd_dx_dhaz_rd || fd_xm_dhaz_rd || fd_dx_dhaz_r30 || fd_xm_dhaz_r30;
 	
 endmodule
