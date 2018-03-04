@@ -122,7 +122,6 @@ module processor(
 	
 	wire [31:0] data_writeStatusReg;
 	
-//	controls my_controls(opcode, ALU_op, ctrl_writeEnable, br, DMwe, ALUinB, Rwd, j, jr, jal);
 	
 	/******************************* Initialize Pipelines **********************************/
 	// assign enable_pc = 1'b1;
@@ -176,37 +175,6 @@ module processor(
 	/* Data Hazards */
 	data_hazard_control dhc(insn_fd_out, insn_dx_out, insn_xm_out, data_hazard);
 	
-	
-	/* Single Cycle */
-	
-	/*
-	latch_PC 		lpc(clock, reset, enable_pc, pc_in, pc_out);
-	
-	stage_fetch    fetch(pc_out, address_imem, pc_plus_1, pc_upper_5);
-	
-	latch_FD			lfd(clock, reset, enable_fd, pc_plus_1, q_imem, pc_fd_out, insn_fd_out);
-
-	// insn_fd_out
-	stage_decode	decode(q_imem, ctrl_readRegA, ctrl_readRegB); 
-	
-	latch_DX			ldx(clock, reset, enable_dx, pc_fd_out, insn_fd_out, pc_dx_out, insn_dx_out, data_readRegA, data_readRegB, a_dx_out, b_dx_out);
-
-	// insn_dx_out
-	stage_execute	execute(q_imem, data_readRegA, data_readRegB, pc_plus_1, pc_upper_5,  		// inputs
-								execute_o_out, execute_b_out, take_branch, overflow, pc_in);			// outputs
-	 
-	latch_XM       lxm(clock, reset, enable_xm, insn_dx_out, insn_xm_out, execute_o_out, execute_b_out, o_xm_out, b_xm_out);
-	
-	// insn_xm_out
-	stage_memory   memory(q_imem, q_dmem, execute_o_out, execute_b_out, memory_o_out, memory_d_out, d_dmem, address_dmem, wren);
-	
-	latch_MW       lmw(clock, reset, enable_mw, insn_xm_out, insn_mw_out, memory_o_out, memory_d_out, o_mw_out, d_mw_out);
-	
-	// insn_mw_out
-	stage_write		writeback(q_imem, memory_o_out, memory_d_out, pc_plus_1, pc_upper_5, overflow, 			// inputs
-									data_writeReg, data_writeStatusReg, ctrl_writeReg, ctrl_writeEnable);		// outputs
-	
-	*/
 	
 
 endmodule
