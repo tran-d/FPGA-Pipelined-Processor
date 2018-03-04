@@ -6,7 +6,7 @@
   
 module processor_tb_auto();
 
-	integer CYCLE_LIMIT = 10; // Modify this to change number of cycles run during test
+	integer CYCLE_LIMIT = 50; // Modify this to change number of cycles run during test
 
 	reg clock = 0, reset = 0;
 	integer cycle_count = 0, error_count = 0;
@@ -30,10 +30,12 @@ module processor_tb_auto();
 	// wire [31:0] q_dmem = dut.my_processor.q_dmem;
 
 	// Hazards
-	wire fd_dx_data_hazard_r	= dut.my_processor.dhc.fd_dx_data_hazard_r;
-	wire fd_xm_data_hazard_r	= dut.my_processor.dhc.fd_xm_data_hazard_r;
-	wire fd_dx_data_hazard_addi	= dut.my_processor.dhc.fd_dx_data_hazard_addi;
-	wire fd_xm_data_hazard_addi	= dut.my_processor.dhc.fd_xm_data_hazard_addi;
+	wire fd_dx_dhaz_rs_rt		= dut.my_processor.dhc.fd_dx_dhaz_rs_rt;
+	wire fd_xm_dhaz_rs_rt		= dut.my_processor.dhc.fd_xm_dhaz_rs_rt;
+	wire fd_dx_dhaz_rs			= dut.my_processor.dhc.fd_dx_dhaz_rs;
+	wire fd_xm_dhaz_rs			= dut.my_processor.dhc.fd_xm_dhaz_rs;
+	wire fd_dx_dhaz_rd			= dut.my_processor.dhc.fd_dx_dhaz_rd;
+	wire fd_xm_dhaz_rd			= dut.my_processor.dhc.fd_xm_dhaz_rd;
 
 	wire [31:0] insn_fd		= dut.my_processor.lfd.insn_in;
 	wire [31:0] insn_dx		= dut.my_processor.ldx.insn_in;
@@ -64,6 +66,8 @@ module processor_tb_auto();
 	wire [31:0] memory_d_out = dut.my_processor.memory.d_out;
 	wire [31:0] writeback_o_in = dut.my_processor.writeback.o_in;
 	wire [31:0] writeback_d_in = dut.my_processor.writeback.d_in;
+
+	wire exec_write_exception = dut.my_processor.execute.exception;
 	
 	// DUT 
 	skeleton dut(clock, reset);
@@ -77,15 +81,19 @@ module processor_tb_auto();
 		
 		//$monitor("ALU_op: %b, alu_opA: %d, alu_opB: %d alu_result: %d", ALU_op, alu_operandA, alu_operandB, alu_operandB, exec_alu_operandB, alu_result);
 		
-		$monitor("clock: %d, opcode: %b, pc_curr(out): %d, pc_next(in) %d", clock, opcode, pc_out, pc_in);
+		//$monitor("clock: %d, opcode: %b, pc_curr(out): %d, pc_next(in) %d", clock, opcode, pc_out, pc_in);
 
 		// HAZARDS
-		//$monitor("clock: %d, opcode: %b, fd_dx_data_hazard_r: %b, fd_xm_data_hazard_r: %b", clock, opcode, fd_dx_data_hazard_r, fd_xm_data_hazard_r);
+		//$monitor("clock: %d, opcode: %b, fd_dx_dhaz_rs_rt: %b, fd_xm_dhaz_rs_rt: %b", clock, opcode, fd_dx_dhaz_rs_rt, fd_xm_dhaz_rs_rt);
 
-		//$monitor("pc_out: %d, clock: %d, opcode: %b, fd_dx_haz_r: %b, fd_xm_haz_r: %b, fd_dx_haz_addi: %b, fd_xm_haz_addi: %b", pc_out, clock, opcode, fd_dx_data_hazard_r, fd_xm_data_hazard_r, fd_dx_data_hazard_addi, fd_xm_data_hazard_addi);
+		//$monitor("pc_out: %d, clock: %d, opcode: %b, fd_dx_haz_r: %b, fd_xm_haz_r: %b, fd_dx_haz_addi: %b, fd_xm_haz_addi: %b", pc_out, clock, opcode, fd_dx_dhaz_rs_rt, fd_xm_dhaz_rs_rt, fd_dx_dhaz_rs, fd_xm_dhaz_rs);
 
-		//$monitor("pc_out: %d, clock: %d, opcode: %b, fd_dx_haz_r: %b, fd_xm_haz_r: %b, alu_opA: %d, alu_opB: %d ctrl_writeReg: %d", pc_out, clock, opcode, fd_dx_data_hazard_addi, fd_xm_data_hazard_addi, alu_operandA, alu_operandB, regfile_ctrlWrite);
+		$monitor("pc_out: %d, clock: %d, opcode: %b, fd_dx_haz_rd: %b, fd_xm_haz_rd: %b", pc_out, clock, opcode, fd_dx_dhaz_rd, fd_xm_dhaz_rd);
 
+
+		//$monitor("pc_out: %d, clock: %d, opcode: %b, fd_dx_haz_r: %b, fd_xm_haz_r: %b, alu_opA: %d, alu_opB: %d ctrl_writeReg: %d", pc_out, clock, opcode, fd_dx_dhaz_rs, fd_xm_dhaz_rs, alu_operandA, alu_operandB, regfile_ctrlWrite);
+
+		//$monitor("clock: %d, opcode: %d, exec_write_exception: %d", clock, opcode, exec_write_exception);
 		#(20*(CYCLE_LIMIT+1.5))
 
 
@@ -126,7 +134,11 @@ module processor_tb_auto();
 	endtask
 
 	task performTests; begin
-		checkRegister(32'd30, 32'd5);
+		checkRegister(32'd30, 32'd7);
+		checkRegister(32'd4, 32'd0);
+		checkRegister(32'd5, 32'd0);
+		checkRegister(32'd6, 32'd6);
+		checkRegister(32'd7, 32'd7);
 	end endtask
 
 endmodule

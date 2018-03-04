@@ -50,16 +50,16 @@ module write_controls(insn, lw, jal, setx, ctrl_writeEnable);
 	
 	assign r_insn 		= ~opcode[4] & ~opcode[3] & ~opcode[2] & ~opcode[1] & ~opcode[0];
 
-	assign ALU_add 	= ~ALU_op[4] & ~ALU_op[3] & ~ALU_op[2] & ~ALU_op[1] & ~ALU_op[0];	//00000
-	assign ALU_sub 	= ~ALU_op[4] & ~ALU_op[3] & ~ALU_op[2] & ~ALU_op[1] &  ALU_op[0];	//00001
-	assign ALU_mul 	= ~ALU_op[4] & ~ALU_op[3] &  ALU_op[2] &  ALU_op[1] & ~ALU_op[0];	//00110
-	assign ALU_div 	= ~ALU_op[4] & ~ALU_op[3] &  ALU_op[2] &  ALU_op[1] &  ALU_op[0];	//00111	
-	
-	assign add 			= r_insn && ALU_add;
+//	assign ALU_add 	= ~ALU_op[4] & ~ALU_op[3] & ~ALU_op[2] & ~ALU_op[1] & ~ALU_op[0];	//00000
+//	assign ALU_sub 	= ~ALU_op[4] & ~ALU_op[3] & ~ALU_op[2] & ~ALU_op[1] &  ALU_op[0];	//00001
+//	assign ALU_mul 	= ~ALU_op[4] & ~ALU_op[3] &  ALU_op[2] &  ALU_op[1] & ~ALU_op[0];	//00110
+//	assign ALU_div 	= ~ALU_op[4] & ~ALU_op[3] &  ALU_op[2] &  ALU_op[1] &  ALU_op[0];	//00111	
+//	
+//	assign add 			= r_insn && ALU_add;
 	assign addi 		= ~opcode[4] & ~opcode[3] &  opcode[2] & ~opcode[1] &  opcode[0];	//00101
-	assign sub 			= r_insn && ALU_sub;
-	assign mul 			= r_insn && ALU_mul;
-	assign div 			= r_insn && ALU_div;
+//	assign sub 			= r_insn && ALU_sub;
+//	assign mul 			= r_insn && ALU_mul;
+//	assign div 			= r_insn && ALU_div;
 	
 	assign lw	 		= ~opcode[4] &  opcode[3] & ~opcode[2] & ~opcode[1] & ~opcode[0];	//01000
 	assign jal	 		= ~opcode[4] & ~opcode[3] & ~opcode[2] &  opcode[1] &  opcode[0];	//00011
@@ -67,7 +67,7 @@ module write_controls(insn, lw, jal, setx, ctrl_writeEnable);
 	assign custom_r   = 1'b0; // CHANGE THIS LATER
 	
 	
-	assign write_rstatus_exception = add || addi || sub || mul || div;
+	//assign write_rstatus_exception = add || addi || sub || mul || div;
 	assign ctrl_writeEnable = r_insn || addi || lw || jal || setx || custom_r;		//includes write to $rstatus
 	
 
