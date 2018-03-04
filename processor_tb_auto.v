@@ -6,7 +6,7 @@
   
 module processor_tb_auto();
 
-	integer CYCLE_LIMIT = 15; // Modify this to change number of cycles run during test
+	integer CYCLE_LIMIT = 20; // Modify this to change number of cycles run during test
 
 	reg clock = 0, reset = 0;
 	integer cycle_count = 0, error_count = 0;
@@ -28,6 +28,12 @@ module processor_tb_auto();
 	wire [4:0] regfile_ctrlWrite = dut.my_processor.ctrl_writeReg;
 	// wire [4:0] decode_ctrl_b = dut.my_processor.ctrl_readRegB;
 	// wire [31:0] q_dmem = dut.my_processor.q_dmem;
+
+	// Hazards
+	wire fd_dx_data_hazard_r	= dut.my_processor.dhc.fd_dx_data_hazard_r;
+	wire fd_xm_data_hazard_r	= dut.my_processor.dhc.fd_xm_data_hazard_r;
+	wire fd_dx_data_hazard_addi	= dut.my_processor.dhc.fd_dx_data_hazard_addi;
+	wire fd_xm_data_hazard_addi	= dut.my_processor.dhc.fd_xm_data_hazard_addi;
 
 	wire [31:0] insn_fd		= dut.my_processor.lfd.insn_in;
 	wire [31:0] insn_dx		= dut.my_processor.ldx.insn_in;
@@ -67,12 +73,18 @@ module processor_tb_auto();
 		$display($time, ":  << Starting Test >>\n");	
 
 
-		$monitor("clock %d, opcode: %b, pc_curr(out): %d, pc_next(in) %d\ninsn_fd: %d, insn_dx: %d, insn_xm: %d insn_mw: %d\nALU_op: %b, alu_opA: %d, alu_opB: %d alu_result: %d\n\n", clock, opcode, pc_out, pc_in, insn_fd, insn_dx, insn_xm, insn_mw, ALU_op, alu_operandA, alu_operandB, alu_operandB, exec_alu_operandB, alu_result);
+		//$monitor("clock %d, opcode: %b, pc_curr(out): %d, pc_next(in) %d\ninsn_fd: %d, insn_dx: %d, insn_xm: %d insn_mw: %d\nALU_op: %b, alu_opA: %d, alu_opB: %d alu_result: %d\n\n", clock, opcode, pc_out, pc_in, insn_fd, insn_dx, insn_xm, insn_mw, ALU_op, alu_operandA, alu_operandB, alu_operandB, exec_alu_operandB, alu_result);
 		
 		//$monitor("ALU_op: %b, alu_opA: %d, alu_opB: %d alu_result: %d", ALU_op, alu_operandA, alu_operandB, alu_operandB, exec_alu_operandB, alu_result);
 		
 		//$monitor("opcode: %b, pc_curr(out): %d, pc_next(in) %d", opcode, pc_out, pc_in);
 
+		// HAZARDS
+		//$monitor("clock: %d, opcode: %b, fd_dx_data_hazard_r: %b, fd_xm_data_hazard_r: %b", clock, opcode, fd_dx_data_hazard_r, fd_xm_data_hazard_r);
+
+		//$monitor("pc_out: %d, clock: %d, opcode: %b, fd_dx_haz_r: %b, fd_xm_haz_r: %b, fd_dx_haz_addi: %b, fd_xm_haz_addi: %b", pc_out, clock, opcode, fd_dx_data_hazard_r, fd_xm_data_hazard_r, fd_dx_data_hazard_addi, fd_xm_data_hazard_addi);
+
+		$monitor("pc_out: %d, clock: %d, opcode: %b, fd_dx_haz_r: %b, fd_xm_haz_r: %b, alu_opA: %d, alu_opB: %d ctrl_writeReg: %d", pc_out, clock, opcode, fd_dx_data_hazard_r, fd_xm_data_hazard_r, alu_operandA, alu_operandB, regfile_ctrlWrite);
 
 		#(20*(CYCLE_LIMIT+1.5))
 
@@ -114,11 +126,14 @@ module processor_tb_auto();
 	endtask
 
 	task performTests; begin
-		checkRegister(32'd1, 32'd3);
-		checkRegister(32'd4, 32'd2);
-		checkRegister(32'd5, 32'd2);
-		checkRegister(32'd6, 32'd2);
-		checkRegister(32'd3, 32'd5);
+		checkRegister(32'd1, 32'd0);
+		checkRegister(32'd2, 32'd0);
+		checkRegister(32'd3, 32'd0);
+		checkRegister(32'd4, 32'd0);
+		checkRegister(32'd5, 32'd0);
+		checkRegister(32'd6, 32'd0);
+		checkRegister(32'd7, 32'd7);
+		checkRegister(32'd8, 32'd8);
 	end endtask
 
 endmodule

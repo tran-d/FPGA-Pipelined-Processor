@@ -12,14 +12,14 @@ module stage_execute(
 	b_out,
 	take_branch,
 	overflow,
-	pc_in
-	);
+	pc_in,
+	j_took_branch);
 
 	input [4:0] pc_upper_5;
 	input [31:0] insn, regfile_operandA, regfile_operandB, pc_plus_1;
 	
 	output [31:0] o_out, b_out;
-	output take_branch, overflow;
+	output take_branch, overflow, j_took_branch; // might need this
 	output [31:0] pc_in;
 
 	wire isNotEqual, isLessThan;
@@ -31,7 +31,7 @@ module stage_execute(
 	assign shamt = insn[11:7];
 		
 	execute_controls ec(insn, regfile_operandA, regfile_operandB, pc_plus_1, pc_upper_5, 
-								ALU_operandA, ALU_operandB, isNotEqual, isLessThan, take_branch, pc_in, mux_ALU_op);
+								ALU_operandA, ALU_operandB, isNotEqual, isLessThan, take_branch, pc_in, mux_ALU_op, j_took_branch);
 		
 	alu my_alu(ALU_operandA, ALU_operandB, mux_ALU_op, shamt, o_out, isNotEqual, isLessThan, overflow);
 	
@@ -42,14 +42,14 @@ endmodule
 
 
 module execute_controls(insn, regfile_operandA, regfile_operandB, pc_plus_4, pc_upper_5, 
-							ALU_operandA, ALU_operandB, isNotEqual, isLessThan, take_branch, pc_in, mux_ALU_op);
+							ALU_operandA, ALU_operandB, isNotEqual, isLessThan, take_branch, pc_in, mux_ALU_op, j_took_branch);
 
 	input [4:0] pc_upper_5;
 	input [31:0] insn, regfile_operandA, regfile_operandB, pc_plus_4; 
 	input  isNotEqual, isLessThan;
 	
 	output [31:0] ALU_operandA, ALU_operandB, pc_in;
-	output take_branch;
+	output take_branch, j_took_branch;
 	output [4:0] mux_ALU_op;
 	
 	/* Insn Controls */
@@ -108,9 +108,10 @@ module execute_controls(insn, regfile_operandA, regfile_operandB, pc_plus_4, pc_
 	
 	assign pc_in 			= (j | jal | take_bex) 	? {pc_upper_5, target} 		:  inter2; 		// PC = T, 				j/jal/take_bex
 	assign inter2 			= (take_bne | take_blt) ? pc_plus_4_plus_immediate :	inter3; 		// PC = PC + 1 + N, 	take_bne/take_blt
-	assign inter3			= jr 							? regfile_operandB			: 	pc_plus_4;	// PC = $rd				jr  (else PC = PC + 1)
+	assign inter3			= jr 							? regfile_operandB			: 	32'd0;	// PC = $rd				jr  (else PC = PC + 1) ?= 0
 	
 	adder32 my_adder32(pc_plus_4, immediate_ext, 1'b0, pc_plus_4_plus_immediate, dovf, dne, dlt);
 	
+	assign j_took_branch = j | jal | take_bex | take_blt | take_bne | jr;
 	
 endmodule

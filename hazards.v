@@ -64,6 +64,6 @@ module data_hazard_control(fd_insn, dx_insn, xm_insn, is_data_hazard); // dont n
 	assign fd_dx_data_hazard_addi = (fd_addi_insn || fd_lw_insn) && dx_write_insn && &fd_rs1_equals_dx_rd[4:0] && |fd_rs1[4:0];
 	assign fd_xm_data_hazard_addi = (fd_addi_insn || fd_lw_insn) && xm_write_insn && &fd_rs1_equals_xm_rd[4:0] && |fd_rs1[4:0];
 	
-	assign is_data_hazard = fd_dx_data_hazard_r || fd_xm_data_hazard_r || fd_dx_data_hazard_addi || fd_xm_data_hazard_addi;
+	assign is_data_hazard = fd_dx_data_hazard_r | fd_xm_data_hazard_r | fd_dx_data_hazard_addi | fd_xm_data_hazard_addi;
 	
 endmodule
