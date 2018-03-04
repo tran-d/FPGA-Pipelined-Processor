@@ -3,52 +3,46 @@ module stage_write(
 	insn,
 	o_in,	
 	d_in,  //q_dmem
-	pc_plus_4, 
-	pc_upper_5,
-	exception,
+	write_exception,
 	
 	data_writeReg, 
 	data_writeStatusReg,
 	ctrl_writeReg,
 	ctrl_writeEnable
 	);
-
-	input [4:0] pc_upper_5;
-	input [31:0] insn, o_in, pc_plus_4, d_in;
-	input exception;
-	output [31:0] data_writeReg, data_writeStatusReg;
+	
+	input [31:0] insn, o_in, d_in;
+	input write_exception;
+	output [31:0] data_writeReg;
 	output [4:0] ctrl_writeReg;
 	output ctrl_writeEnable;
 	
 	
+	wire write_rstatus_exception, lw, jal, setx;
 	
-	wire write_rstatus_exception, lw, jal;
-	
-	write_controls	wc(insn, write_rstatus_exception, lw, jal, ctrl_writeEnable);
+	write_controls	wc(insn, write_rstatus_exception, lw, jal, setx, ctrl_writeEnable);
 	
 	wire [4:0] rd;
-	wire [26:0] target;
 
 	assign rd 			= insn[26:22];
-	assign target 		= insn[26:0];
 	
 	/* Determine reg & data to write to regfile */
 	
 	wire [31:0] intermediate;
+	wire [4:0] ctrl_writeReg_alt1;
 	
-	assign intermediate  	 	= lw 	? d_in	   : o_in;
-	assign data_writeReg		   = jal ? pc_plus_4 : intermediate;		// lw, jal, ALU_result
-	assign data_writeStatusReg = write_rstatus_exception ? {{31{1'b0}}, exception} : {pc_upper_5, target};  // rstatus = T (setx) or exception (add, addi, sub, mul, div)
-	assign ctrl_writeReg 		= jal ? 5'd31 : rd;
+	assign data_writeReg 		= lw ? d_in : o_in;
+	assign ctrl_writeReg 		= jal ? 5'd31 : ctrl_writeReg_alt1;
+	assign ctrl_writeReg_alt1	= ( write_exception | setx ) ? 5'd30 : rd;
 	
 endmodule
 
-module write_controls(insn, write_rstatus_exception, lw, jal, ctrl_writeEnable);
+module write_controls(insn, write_rstatus_exception, lw, jal, setx, ctrl_writeEnable);
 	
 	input [31:0] insn;
-	output write_rstatus_exception, lw, jal, ctrl_writeEnable;
+	output write_rstatus_exception, lw, jal, ctrl_writeEnable, setx;
 	
-	wire add, addi, sub, mul, div, setx, custom_r;
+	wire add, addi, sub, mul, div, custom_r;
 	wire r_insn;
 	wire ALU_add, ALU_sub, ALU_mul, ALU_div;
 	wire [4:0] opcode, ALU_op;

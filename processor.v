@@ -134,6 +134,7 @@ module processor(
 	wire [31:0] pc_fd_out, pc_dx_out;
 	wire [31:0] insn_fd_out, insn_dx_out, insn_mw_out, insn_xm_out;
 	wire [31:0] a_dx_out, b_dx_out, o_xm_out, b_xm_out, o_mw_out, d_mw_out;
+	wire exec_write_exception, xm_write_exception, mw_write_exception;
 	wire data_hazard;
 	
 	//assign pc_in = take_branch
@@ -155,20 +156,20 @@ module processor(
 	latch_DX			ldx(clock, reset, enable_dx, pc_fd_out, insn_dx_in, pc_dx_out, insn_dx_out, data_readRegA, data_readRegB, a_dx_out, b_dx_out);
 
 	
-	stage_execute	execute(insn_dx_out, a_dx_out, b_dx_out, pc_plus_1, pc_upper_5,  		// inputs
-								execute_o_out, execute_b_out, take_branch, overflow, exec_pc_out, j_took_branch);			// outputs
+	stage_execute	execute(insn_dx_out, a_dx_out, b_dx_out, pc_dx_out, pc_upper_5,  		// inputs
+								execute_o_out, execute_b_out, take_branch, exec_write_exception, exec_pc_out, j_took_branch);			// outputs
 	
 
-	latch_XM       lxm(clock, reset, enable_xm, insn_dx_out, insn_xm_out, execute_o_out, execute_b_out, o_xm_out, b_xm_out);
+	latch_XM       lxm(clock, reset, enable_xm, exec_write_exception, xm_write_exception, insn_dx_out, insn_xm_out, execute_o_out, execute_b_out, o_xm_out, b_xm_out);
 	
 
 	stage_memory   memory(insn_xm_out, q_dmem, o_xm_out, b_xm_out, memory_o_out, memory_d_out, d_dmem, address_dmem, wren);
 
 	
-	latch_MW       lmw(clock, reset, enable_mw, insn_xm_out, insn_mw_out, memory_o_out, memory_d_out, o_mw_out, d_mw_out);
+	latch_MW       lmw(clock, reset, enable_mw, xm_write_exception, mw_write_exception, insn_xm_out, insn_mw_out, memory_o_out, memory_d_out, o_mw_out, d_mw_out);
 
 
-	stage_write		writeback(insn_mw_out, o_mw_out, d_mw_out, pc_plus_1, pc_upper_5, overflow, 			// inputs
+	stage_write		writeback(insn_mw_out, o_mw_out, d_mw_out, mw_write_exception, 			// inputs
 									data_writeReg, data_writeStatusReg, ctrl_writeReg, ctrl_writeEnable);		// outputs
 	
 	

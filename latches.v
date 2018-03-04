@@ -34,29 +34,35 @@ module latch_DX(clock, reset, enable, pc_plus_1_in, insn_in, pc_plus_1_out, insn
 
 endmodule
 
-module latch_XM(clock, reset, enable, insn_in, insn_out, o_in, b_in, o_out, b_out);
+module latch_XM(clock, reset, write_exception_in, write_exception_out, enable, insn_in, insn_out, o_in, b_in, o_out, b_out);
 
 	input  [31:0] insn_in, o_in, b_in;
-	input  clock, reset, enable;
+	input  clock, reset, enable, write_exception_in;
 	output [31:0] insn_out, o_out, b_out;
+	output write_exception_out;
 	
 	reg32 pc_insn(insn_in, clock, reset, enable, insn_out);
 	
 	reg32 o(o_in, clock, reset, enable, o_out);
 	reg32 b(b_in, clock, reset, enable, b_out);
 	
+	dflipflop my_dffe(write_exception_in, clock, reset, enable, write_exception_out);
+	
 
 endmodule
 
-module latch_MW(clock, reset, enable, insn_in, insn_out, o_in, d_in, o_out, d_out);
+module latch_MW(clock, reset, enable, write_exception_in, write_exception_out, insn_in, insn_out, o_in, d_in, o_out, d_out);
 
 	input  [31:0] insn_in, o_in, d_in;
-	input  clock, reset, enable;
+	input  clock, reset, enable, write_exception_in;
 	output [31:0] insn_out, o_out, d_out;
+	output write_exception_out;
 	
 	reg32 pc_insn(insn_in, clock, reset, enable, insn_out);
 	
 	reg32 o(o_in, clock, reset, enable, o_out);
 	reg32 d(d_in, clock, reset, enable, d_out);
+	
+	dflipflop my_dffe(write_exception_in, clock, reset, enable, write_exception_out);
 
 endmodule
