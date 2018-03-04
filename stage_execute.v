@@ -6,6 +6,7 @@ module stage_execute(
 	regfile_operandB,
 	pc_plus_1,
 	pc_upper_5,
+	pc_out,
 
 	// outputs
 	o_out,
@@ -16,7 +17,7 @@ module stage_execute(
 	j_took_branch);
 
 	input [4:0] pc_upper_5;
-	input [31:0] insn, regfile_operandA, regfile_operandB, pc_plus_1;
+	input [31:0] insn, regfile_operandA, regfile_operandB, pc_plus_1, pc_out;
 	
 	output [31:0] o_out, b_out;
 	output take_branch, write_exception, j_took_branch; // might need this
@@ -32,7 +33,7 @@ module stage_execute(
 		
 	execute_controls ec(insn, regfile_operandA, regfile_operandB, pc_plus_1, pc_upper_5, exception,
 								ALU_operandA, ALU_operandB, ALU_result, isNotEqual, isLessThan, take_branch, pc_in, mux_ALU_op, 
-								j_took_branch, o_out, write_exception);
+								j_took_branch, o_out, write_exception, pc_out);
 		
 	alu my_alu(ALU_operandA, ALU_operandB, mux_ALU_op, shamt, ALU_result, isNotEqual, isLessThan, exception);
 	
@@ -44,10 +45,10 @@ endmodule
 
 module execute_controls(insn, regfile_operandA, regfile_operandB, pc_plus_1, pc_upper_5, exception,
 							ALU_operandA, ALU_operandB, ALU_result, isNotEqual, isLessThan, take_branch, pc_in, mux_ALU_op, 
-							j_took_branch, o_out, write_exception);
+							j_took_branch, o_out, write_exception, pc_out);
 
 	input [4:0] pc_upper_5;
-	input [31:0] insn, regfile_operandA, regfile_operandB, ALU_result, pc_plus_1; 
+	input [31:0] insn, regfile_operandA, regfile_operandB, ALU_result, pc_plus_1, pc_out; 
 	input  isNotEqual, isLessThan, exception;
 	
 	output [31:0] ALU_operandA, ALU_operandB, pc_in, o_out;
@@ -118,14 +119,14 @@ module execute_controls(insn, regfile_operandA, regfile_operandB, pc_plus_1, pc_
 	
 	/* PC controls */ 
 	wire [31:0] pc_plus_1_plus_immediate;
-	wire dovf, dne, dlt;
+	wire dovf1, dne1, dlt1;
 	wire [31:0] inter2, inter3;
 	
 	assign pc_in 			= (j | jal | take_bex) 	? {pc_upper_5, target} 		:  inter2; 		// PC = T, 				j/jal/take_bex
 	assign inter2 			= (take_bne | take_blt) ? pc_plus_1_plus_immediate :	inter3; 		// PC = PC + 1 + N, 	take_bne/take_blt
 	assign inter3			= jr 							? regfile_operandB			: 	32'd0;		// PC = $rd				jr  (else PC = PC + 1) ?= 0
 	
-	adder32 my_adder32(pc_plus_1, immediate_ext, 1'b0, pc_plus_1_plus_immediate, dovf, dne, dlt);
+	adder32 another_adder32(pc_out, immediate_ext, 1'b0, pc_plus_1_plus_immediate, dovf1, dne1, dlt1);
 	
 	assign j_took_branch = j | jal | take_bex | take_blt | take_bne | jr;
 	
@@ -133,7 +134,7 @@ module execute_controls(insn, regfile_operandA, regfile_operandB, pc_plus_1, pc_
 	/* LATCH Controls */ 
 	wire [31:0] o_out_alt1, o_out_alt2, o_out_alt3, o_out_alt4, o_out_alt5, o_out_alt6;
 	
-	assign o_out 		= jal ? pc_plus_1 : o_out_alt1;
+	assign o_out 		= jal ? pc_out : o_out_alt1;
 	assign o_out_alt1 = (add  && exception) ? 32'd1 : o_out_alt2;
 	assign o_out_alt2 = (addi && exception) ? 32'd2 : o_out_alt3;
 	assign o_out_alt3 = (sub  && exception) ? 32'd3 : o_out_alt4;
