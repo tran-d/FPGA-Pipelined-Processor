@@ -77,14 +77,14 @@ module processor_tb_auto();
 		
 		//$monitor("ALU_op: %b, alu_opA: %d, alu_opB: %d alu_result: %d", ALU_op, alu_operandA, alu_operandB, alu_operandB, exec_alu_operandB, alu_result);
 		
-		//$monitor("opcode: %b, pc_curr(out): %d, pc_next(in) %d", opcode, pc_out, pc_in);
+		$monitor("clock: %d, opcode: %b, pc_curr(out): %d, pc_next(in) %d", clock, opcode, pc_out, pc_in);
 
 		// HAZARDS
 		//$monitor("clock: %d, opcode: %b, fd_dx_data_hazard_r: %b, fd_xm_data_hazard_r: %b", clock, opcode, fd_dx_data_hazard_r, fd_xm_data_hazard_r);
 
 		//$monitor("pc_out: %d, clock: %d, opcode: %b, fd_dx_haz_r: %b, fd_xm_haz_r: %b, fd_dx_haz_addi: %b, fd_xm_haz_addi: %b", pc_out, clock, opcode, fd_dx_data_hazard_r, fd_xm_data_hazard_r, fd_dx_data_hazard_addi, fd_xm_data_hazard_addi);
 
-		$monitor("pc_out: %d, clock: %d, opcode: %b, fd_dx_haz_r: %b, fd_xm_haz_r: %b, alu_opA: %d, alu_opB: %d ctrl_writeReg: %d", pc_out, clock, opcode, fd_dx_data_hazard_r, fd_xm_data_hazard_r, alu_operandA, alu_operandB, regfile_ctrlWrite);
+		//$monitor("pc_out: %d, clock: %d, opcode: %b, fd_dx_haz_r: %b, fd_xm_haz_r: %b, alu_opA: %d, alu_opB: %d ctrl_writeReg: %d", pc_out, clock, opcode, fd_dx_data_hazard_addi, fd_xm_data_hazard_addi, alu_operandA, alu_operandB, regfile_ctrlWrite);
 
 		#(20*(CYCLE_LIMIT+1.5))
 

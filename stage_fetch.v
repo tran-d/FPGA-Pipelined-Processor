@@ -7,7 +7,6 @@ module stage_fetch(pc_out, exec_pc_out, j_took_branch, address_imem, pc_plus_1, 
 	output [11:0] address_imem;
 	output [4:0] pc_upper_5;
 	
-	
 	assign address_imem[11:0] = pc_out[11:0];
 	assign pc_upper_5[4:0] = pc_out[31:27];
 	

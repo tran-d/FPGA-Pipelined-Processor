@@ -4,7 +4,7 @@ module latch_PC(clock, reset, enable, pc_in, pc_out);
 	input clock, reset, enable;
 	output [31:0] pc_out;
 	
-	reg32 pc(pc_in, clock, reset, enable, pc_out);
+	reg32_neg pc(pc_in, clock, reset, enable, pc_out);
 
 endmodule
 

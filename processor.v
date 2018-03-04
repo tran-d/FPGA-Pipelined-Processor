@@ -125,8 +125,8 @@ module processor(
 //	controls my_controls(opcode, ALU_op, ctrl_writeEnable, br, DMwe, ALUinB, Rwd, j, jr, jal);
 	
 	/******************************* Initialize Pipelines **********************************/
-	assign enable_pc = 1'b1;
-	assign enable_fd = 1'b1;
+	// assign enable_pc = 1'b1;
+	// assign enable_fd = 1'b1;
 	assign enable_dx = 1'b1;
 	assign enable_xm = 1'b1;
 	assign enable_mw = 1'b1;
