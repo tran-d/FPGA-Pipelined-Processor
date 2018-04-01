@@ -135,6 +135,8 @@ module processor(
 	wire [31:0] a_dx_out, b_dx_out, o_xm_out, b_xm_out, o_mw_out, d_mw_out;
 	wire exec_write_exception, xm_write_exception, mw_write_exception;
 	wire data_hazard;
+	/* BYPASS */
+	wire mx_bypass_A, mx_bypass_B, wx_bypass_A, wx_bypass_B, wm_bypass;
 	
 	//assign pc_in = take_branch
 	latch_PC 		lpc(clock, reset, ~data_hazard, pc_in, pc_out);
@@ -163,7 +165,7 @@ module processor(
 	latch_XM       lxm(clock, reset, enable_xm, exec_write_exception, xm_write_exception, insn_dx_out, insn_xm_out, execute_o_out, execute_b_out, o_xm_out, b_xm_out);
 	
 
-	stage_memory   memory(insn_xm_out, q_dmem, o_xm_out, b_xm_out, memory_o_out, memory_d_out, d_dmem, address_dmem, wren);
+	stage_memory   memory(insn_xm_out, q_dmem, o_xm_out, b_xm_out, memory_o_out, memory_d_out, d_dmem, address_dmem, wren, wm_bypass, data_writeReg);
 
 	
 	latch_MW       lmw(clock, reset, enable_mw, xm_write_exception, mw_write_exception, insn_xm_out, insn_mw_out, memory_o_out, memory_d_out, o_mw_out, d_mw_out);
@@ -174,8 +176,9 @@ module processor(
 	
 	
 	/* Data Hazards */
-	data_hazard_control dhc(insn_fd_out, insn_dx_out, insn_xm_out, data_hazard);
-	
+	//data_hazard_control dhc(insn_fd_out, insn_dx_out, insn_xm_out, data_hazard);
+	bypass_stall 	bs(insn_fd_out, insn_dx_out, data_hazard);
+	bypass 			b(insn_fd_out, insn_dx_out, insn_xm_out, insn_mw_out, mx_bypass_A, mx_bypass_B, wx_bypass_A, wx_bypass_B, wm_bypass);
 	
 
 endmodule
