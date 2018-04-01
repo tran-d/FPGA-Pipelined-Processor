@@ -4,12 +4,44 @@
   Processor Test Bench
   --------------------*/
   
-module processor_tb_auto();
+module processor_tb_auto(
+	// Instruction Memory
+	address_imem, 
+	dut_q_imem,
+    // Data Memory
+    address_dmem,
+    d_dmem,
+    wren_dmem,
+    dut_q_dmem,
+    // Regfile
+    ctrl_writeEnable, 
+    ctrl_writeReg, 
+    ctrl_readRegA, 
+    ctrl_readRegB, 
+    data_writeReg, 
+    data_readRegA, 
+    data_readRegB);
 
 	integer CYCLE_LIMIT = 10; // Modify this to change number of cycles run during test
 
 	reg clock = 0, reset = 0;
 	integer cycle_count = 0, error_count = 0;
+	// Instruction Memory
+    output wire [11:0]  address_imem;
+    output wire [31:0]  dut_q_imem;
+    // Data Memory
+    output wire [11:0]  address_dmem;
+    output wire [31:0]  d_dmem;
+    output wire         wren_dmem;
+    output wire [31:0]  dut_q_dmem;
+    // Regfile
+    output wire         ctrl_writeEnable;
+    output wire [4:0]   ctrl_writeReg;
+    output wire [4:0]   ctrl_readRegA;
+    output wire [4:0]   ctrl_readRegB;
+    output wire [31:0]  data_writeReg;
+    output wire [31:0]  data_readRegA;
+    output wire [31:0]  data_readRegB;
 	
 	// Probes
 	// wire [31:0] instruction = dut.my_processor.fetch.instruction_out;
@@ -70,7 +102,25 @@ module processor_tb_auto();
 	wire exec_write_exception = dut.my_processor.execute.exception;
 	
 	// DUT 
-	skeleton dut(clock, reset);
+	skeleton_ta dut(
+	clock, 
+	reset, 
+	// Instruction Memory
+	address_imem, 
+	dut_q_imem,
+    // Data Memory
+    address_dmem,
+    d_dmem,
+    wren_dmem,
+    dut_q_dmem,
+    // Regfile
+    ctrl_writeEnable, 
+    ctrl_writeReg, 
+    ctrl_readRegA, 
+    ctrl_readRegB, 
+    data_writeReg, 
+    data_readRegA, 
+    data_readRegB);
 	
 	// Main: wait specified cycles, then perform tests
 	initial begin
@@ -134,11 +184,7 @@ module processor_tb_auto();
 	endtask
 
 	task performTests; begin
-		checkRegister(32'd1, 32'd4);
-		checkRegister(32'd2, 32'd0);
-		checkRegister(32'd3, 32'd0);
-		checkRegister(32'd4, 32'd4);
-		checkRegister(32'd5, 32'd5);
+		checkRegister(32'd1, 32'd2);
 	end endtask
 
 endmodule
