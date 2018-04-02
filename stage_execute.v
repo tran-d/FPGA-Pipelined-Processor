@@ -114,7 +114,7 @@ module execute_controls(insn, regfile_operandA, regfile_operandB, pc_out, pc_upp
 	assign ALU_operandA 		= mx_bypass_A ? o_xm_out : ALU_operandA_alt;
 	assign ALU_operandA_alt = wx_bypass_A ? data_writeReg : regfile_operandA[31:0];
 	
-	assign ALU_operandB 		= immed_insn  	? immediate_ext	: ALU_operandB_alt[31:0];
+	assign ALU_operandB 		= immed_insn  	? immediate_ext	: ALU_operandB_alt;
 	assign ALU_operandB_alt	= bex				? 32'd0				: inter1[31:0];
 	assign inter1 				= mx_bypass_B  ? o_xm_out			: inter10[31:0];
 	assign inter10 			= wx_bypass_B	? data_writeReg	: regfile_operandB;

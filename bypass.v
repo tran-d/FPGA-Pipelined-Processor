@@ -112,11 +112,11 @@ module bypass(fd_insn, dx_insn, xm_insn, mw_insn, mx_bypass_A, mx_bypass_B, wx_b
 	assign mw_write_insn 	=  mw_r_insn || mw_addi_insn || mw_lw_insn;	
 	
 	
-	assign mx_bypass_A 		= dx_read_rs_insn && xm_write_insn && &dx_rs1_equals_xm_rd; 										// need r30
-	assign wx_bypass_A		= dx_read_rs_insn && mw_write_insn && &dx_rs1_equals_mw_rd;											// need r30
+	assign mx_bypass_A 		= dx_read_rs_insn && xm_write_insn && &dx_rs1_equals_xm_rd && |dx_rs1; 							// need r30
+	assign wx_bypass_A		= dx_read_rs_insn && mw_write_insn && &dx_rs1_equals_mw_rd && |dx_rs1;							// need r30
 	// r_insn ? rt[4:0] : rd[4:0]
-	assign mx_bypass_B		= (dx_read_rt_insn && &dx_rs2_equals_xm_rd) || (dx_read_rd_insn && &dx_rd_equals_xm_rd);
-	assign wx_bypass_B		= (dx_read_rt_insn && &dx_rs2_equals_mw_rd) || (dx_read_rd_insn && &dx_rd_equals_mw_rd);
-	assign wm_bypass 			= mw_write_insn && xm_sw_insn && &xm_rd_equals_mw_rd;
+	assign mx_bypass_B		= (dx_read_rt_insn && &dx_rs2_equals_xm_rd && |dx_rs2) || (dx_read_rd_insn && &dx_rd_equals_xm_rd && |dx_rd);
+	assign wx_bypass_B		= (dx_read_rt_insn && &dx_rs2_equals_mw_rd && |dx_rs2) || (dx_read_rd_insn && &dx_rd_equals_mw_rd && |dx_rd);
+	assign wm_bypass 			= mw_write_insn && xm_sw_insn && &xm_rd_equals_mw_rd && |xm_rd;
 
 endmodule
