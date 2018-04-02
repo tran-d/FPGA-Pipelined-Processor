@@ -33,7 +33,7 @@ module bypass_stall(fd_insn, dx_insn, is_bypass_hazard); // dont need register, 
 	end
 	endgenerate
 	
-	assign is_bypass_hazard = dx_lw_insn && (&fd_rs1_equals_dx_rd || &fd_rs2_equals_dx_rd) && fd_sw_insn;
+	assign is_bypass_hazard = dx_lw_insn && (&fd_rs1_equals_dx_rd || &fd_rs2_equals_dx_rd) && !fd_sw_insn;
 	
 			
 
