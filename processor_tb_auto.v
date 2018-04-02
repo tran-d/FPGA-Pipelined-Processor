@@ -22,7 +22,7 @@ module processor_tb_auto(
     data_readRegA, 
     data_readRegB);
 
-	integer CYCLE_LIMIT = 10; // Modify this to change number of cycles run during test
+	integer CYCLE_LIMIT = 6; // Modify this to change number of cycles run during test
 
 	reg clock = 0, reset = 0;
 	integer cycle_count = 0, error_count = 0;
@@ -62,13 +62,20 @@ module processor_tb_auto(
 	// wire [31:0] q_dmem = dut.my_processor.q_dmem;
 
 	// Hazards
-	wire fd_dx_dhaz_rs_rt		= dut.my_processor.dhc.fd_dx_dhaz_rs_rt;
-	wire fd_xm_dhaz_rs_rt		= dut.my_processor.dhc.fd_xm_dhaz_rs_rt;
-	wire fd_dx_dhaz_rs			= dut.my_processor.dhc.fd_dx_dhaz_rs;
-	wire fd_xm_dhaz_rs			= dut.my_processor.dhc.fd_xm_dhaz_rs;
-	wire fd_dx_dhaz_rd			= dut.my_processor.dhc.fd_dx_dhaz_rd;
-	wire fd_xm_dhaz_rd			= dut.my_processor.dhc.fd_xm_dhaz_rd;
+	//wire fd_dx_dhaz_rs_rt		= dut.my_processor.dhc.fd_dx_dhaz_rs_rt;
+	//wire fd_xm_dhaz_rs_rt		= dut.my_processor.dhc.fd_xm_dhaz_rs_rt;
+	//wire fd_dx_dhaz_rs			= dut.my_processor.dhc.fd_dx_dhaz_rs;
+	//wire fd_xm_dhaz_rs			= dut.my_processor.dhc.fd_xm_dhaz_rs;
+	//wire fd_dx_dhaz_rd			= dut.my_processor.dhc.fd_dx_dhaz_rd;
+	//wire fd_xm_dhaz_rd			= dut.my_processor.dhc.fd_xm_dhaz_rd;
 
+	// Bypass
+	wire mx_bypass_A			= dut.my_processor.mx_bypass_A;
+	wire mx_bypass_B			= dut.my_processor.mx_bypass_B;
+	wire wx_bypass_A			= dut.my_processor.wx_bypass_A;
+	wire wx_bypass_B			= dut.my_processor.wx_bypass_B;
+	wire wm_bypass				= dut.my_processor.wm_bypass;
+	
 	wire [31:0] insn_fd		= dut.my_processor.lfd.insn_in;
 	wire [31:0] insn_dx		= dut.my_processor.ldx.insn_in;
 	wire [31:0] insn_xm		= dut.my_processor.lxm.insn_in;
@@ -138,12 +145,18 @@ module processor_tb_auto(
 
 		//$monitor("pc_out: %d, clock: %d, opcode: %b, fd_dx_haz_r: %b, fd_xm_haz_r: %b, fd_dx_haz_addi: %b, fd_xm_haz_addi: %b", pc_out, clock, opcode, fd_dx_dhaz_rs_rt, fd_xm_dhaz_rs_rt, fd_dx_dhaz_rs, fd_xm_dhaz_rs);
 
-		$monitor("pc_out: %d, clock: %d, opcode: %b, fd_dx_haz_rd: %b, fd_xm_haz_rd: %b", pc_out, clock, opcode, fd_dx_dhaz_rd, fd_xm_dhaz_rd);
-
+		//$monitor("pc_out: %d, clock: %d, opcode: %b, fd_dx_haz_rd: %b, fd_xm_haz_rd: %b", pc_out, clock, opcode, fd_dx_dhaz_rd, fd_xm_dhaz_rd);
 
 		//$monitor("pc_out: %d, clock: %d, opcode: %b, fd_dx_haz_r: %b, fd_xm_haz_r: %b, alu_opA: %d, alu_opB: %d ctrl_writeReg: %d", pc_out, clock, opcode, fd_dx_dhaz_rs, fd_xm_dhaz_rs, alu_operandA, alu_operandB, regfile_ctrlWrite);
 
 		//$monitor("clock: %d, opcode: %d, exec_write_exception: %d", clock, opcode, exec_write_exception);
+
+		$monitor("clock: %d, opcode: %d, mx_bypass_A: %d, wx_bypass_A: %d, mx_bypass_B: %d, wx_bypass_B: %d, wm_bypass: %d", clock, opcode, mx_bypass_A, wx_bypass_A, mx_bypass_B, wx_bypass_B, wm_bypass);
+
+
+
+
+
 		#(20*(CYCLE_LIMIT+1.5))
 
 

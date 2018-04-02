@@ -6,6 +6,10 @@ module stage_execute(
 	regfile_operandB,
 	pc_upper_5,
 	pc_out,
+	mx_bypass_A, o_xm_out,
+	wx_bypass_A, data_writeReg,
+	mx_bypass_B,
+	wx_bypass_B,
 
 	// outputs
 	o_out,
@@ -17,6 +21,9 @@ module stage_execute(
 
 	input [4:0] pc_upper_5;
 	input [31:0] insn, regfile_operandA, regfile_operandB, pc_out;
+	//BYPASSING
+	input mx_bypass_A, wx_bypass_A, mx_bypass_B, wx_bypass_B; 
+	input [31:0] o_xm_out, data_writeReg;
 	
 	output [31:0] o_out, b_out;
 	output take_branch, write_exception, j_took_branch; // might need this
@@ -32,11 +39,15 @@ module stage_execute(
 		
 	execute_controls ec(insn, regfile_operandA, regfile_operandB, pc_out, pc_upper_5, exception,
 								ALU_operandA, ALU_operandB, ALU_result, isNotEqual, isLessThan, take_branch, pc_in, mux_ALU_op, 
-								j_took_branch, o_out, write_exception);
+								j_took_branch, o_out, b_out, write_exception,
+								//BYPASSING
+								mx_bypass_A, o_xm_out,
+								wx_bypass_A, data_writeReg,
+								mx_bypass_B, 
+								wx_bypass_B);
 		
 	alu my_alu(ALU_operandA, ALU_operandB, mux_ALU_op, shamt, ALU_result, isNotEqual, isLessThan, exception);
 	
-	assign b_out 		= regfile_operandB;
 	
 
 endmodule
@@ -44,13 +55,21 @@ endmodule
 
 module execute_controls(insn, regfile_operandA, regfile_operandB, pc_out, pc_upper_5, exception,
 							ALU_operandA, ALU_operandB, ALU_result, isNotEqual, isLessThan, take_branch, pc_in, mux_ALU_op, 
-							j_took_branch, o_out, write_exception);
+							j_took_branch, o_out, b_out, write_exception,
+							//BYPASSING
+							mx_bypass_A, o_xm_out,
+							wx_bypass_A, data_writeReg,
+							mx_bypass_B, 
+							wx_bypass_B);
 
 	input [4:0] pc_upper_5;
 	input [31:0] insn, regfile_operandA, regfile_operandB, ALU_result, pc_out; 
 	input  isNotEqual, isLessThan, exception;
+	//BYPASSING
+	input mx_bypass_A, wx_bypass_A, mx_bypass_B, wx_bypass_B; 
+	input [31:0] o_xm_out, data_writeReg;
 	
-	output [31:0] ALU_operandA, ALU_operandB, pc_in, o_out;
+	output [31:0] ALU_operandA, ALU_operandB, pc_in, o_out, b_out;
 	output take_branch, j_took_branch, write_exception;
 	output [4:0] mux_ALU_op;
 	
@@ -90,10 +109,15 @@ module execute_controls(insn, regfile_operandA, regfile_operandB, pc_out, pc_upp
 								(~opcode[4] & ~opcode[3] &  opcode[2] &  opcode[1] &  opcode[0]) || // sw
 								(~opcode[4] &  opcode[3] & ~opcode[2] & ~opcode[1] & ~opcode[0]);   // lw
 	
+	wire [31:0] ALU_operandA_alt, ALU_operandB_alt, inter10;
 	
-	assign ALU_operandA 	= regfile_operandA[31:0];
-	assign ALU_operandB 	= immed_insn  	? immediate_ext	: inter1[31:0];
-	assign inter1[31:0] 	= bex				? 32'd0				: regfile_operandB;
+	assign ALU_operandA 		= mx_bypass_A ? o_xm_out : ALU_operandA_alt;
+	assign ALU_operandA_alt = wx_bypass_A ? data_writeReg : regfile_operandA[31:0];
+	
+	assign ALU_operandB 		= immed_insn  	? immediate_ext	: ALU_operandB_alt[31:0];
+	assign ALU_operandB_alt	= bex				? 32'd0				: inter1[31:0];
+	assign inter1 				= mx_bypass_B  ? o_xm_out			: inter10[31:0];
+	assign inter10 			= wx_bypass_B	? data_writeReg	: regfile_operandB;
 	
 	assign mux_ALU_op 	= addi ? 5'd0 : interm_ALU_op;
 	assign interm_ALU_op = (blt | bne | bex)  ? 5'd1 : ALU_op;
@@ -131,7 +155,7 @@ module execute_controls(insn, regfile_operandA, regfile_operandB, pc_out, pc_upp
 	
 	
 	/* LATCH Controls */ 
-	wire [31:0] o_out_alt1, o_out_alt2, o_out_alt3, o_out_alt4, o_out_alt5, o_out_alt6;
+	wire [31:0] o_out_alt1, o_out_alt2, o_out_alt3, o_out_alt4, o_out_alt5, o_out_alt6, b_out_alt;
 	
 	assign o_out 		= jal ? pc_out : o_out_alt1;
 	assign o_out_alt1 = (add  && exception) ? 32'd1 : o_out_alt2;
@@ -140,6 +164,11 @@ module execute_controls(insn, regfile_operandA, regfile_operandB, pc_out, pc_upp
 	assign o_out_alt4 = (mul  && exception) ? 32'd4 : o_out_alt5;
 	assign o_out_alt5 = (div  && exception) ? 32'd5 : o_out_alt6;
 	assign o_out_alt6 = setx ? {pc_upper_5, target} : ALU_result;
+//	
+//	assign b_out 		= mx_bypass_B ? o_xm_out : b_out_alt;
+//	assign b_out_alt	= wx_bypass_B ? data_writeReg : regfile_operandB;
+	
+	assign b_out = regfile_operandB;
 	
 	assign write_exception = exception && (add | addi | sub | mul | div);
 	

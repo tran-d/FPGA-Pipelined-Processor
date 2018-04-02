@@ -158,7 +158,7 @@ module processor(
 	latch_DX			ldx(clock, reset, enable_dx, pc_fd_out, insn_dx_in, pc_dx_out, insn_dx_out, data_readRegA, data_readRegB, a_dx_out, b_dx_out);
 
 	
-	stage_execute	execute(insn_dx_out, a_dx_out, b_dx_out, pc_upper_5, pc_dx_out, 		// inputs
+	stage_execute	execute(insn_dx_out, a_dx_out, b_dx_out, pc_upper_5, pc_dx_out, mx_bypass_A, o_xm_out,	wx_bypass_A, data_writeReg, mx_bypass_B, wx_bypass_B,	// inputs
 								execute_o_out, execute_b_out, take_branch, exec_write_exception, exec_pc_out, j_took_branch);			// outputs
 	
 
