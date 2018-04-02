@@ -168,8 +168,6 @@ module execute_controls(insn, regfile_operandA, regfile_operandB, pc_out, pc_upp
 	assign b_out 		= mx_bypass_B ? o_xm_out : b_out_alt;
 	assign b_out_alt	= wx_bypass_B ? data_writeReg : regfile_operandB;
 	
-	assign b_out = regfile_operandB;
-	
 	assign write_exception = exception && (add | addi | sub | mul | div);
 	
 endmodule
