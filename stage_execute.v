@@ -164,9 +164,9 @@ module execute_controls(insn, regfile_operandA, regfile_operandB, pc_out, pc_upp
 	assign o_out_alt4 = (mul  && exception) ? 32'd4 : o_out_alt5;
 	assign o_out_alt5 = (div  && exception) ? 32'd5 : o_out_alt6;
 	assign o_out_alt6 = setx ? {pc_upper_5, target} : ALU_result;
-//	
-//	assign b_out 		= mx_bypass_B ? o_xm_out : b_out_alt;
-//	assign b_out_alt	= wx_bypass_B ? data_writeReg : regfile_operandB;
+
+	assign b_out 		= mx_bypass_B ? o_xm_out : b_out_alt;
+	assign b_out_alt	= wx_bypass_B ? data_writeReg : regfile_operandB;
 	
 	assign b_out = regfile_operandB;
 	
