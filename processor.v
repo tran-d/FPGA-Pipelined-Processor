@@ -106,11 +106,11 @@ module processor(
 	wire [31:0] insn_fd_in;
 	
 	wire exec_write_exception, xm_write_exception, mw_write_exception;
-	wire data_hazard, j_took_branch;
+	wire data_hazard, branched_jumped;
 	wire mx_bypass_A, mx_bypass_B, wx_bypass_A, wx_bypass_B, wm_bypass;
 
 	assign nop = 32'd0;
-	assign insn_fd_in = j_took_branch ? nop : q_imem;
+	assign insn_fd_in = branched_jumped ? nop : q_imem;
 	
 	
 	/******************************* Initialize Pipelines **********************************/
@@ -123,11 +123,11 @@ module processor(
 			.pc_out						(pc_out)
 	);
 	
-	//pc_out, execute_pc_out, j_took_branch, address_imem, pc_upper_5, pc_in
+	//pc_out, execute_pc_out, branched_jumped, address_imem, pc_upper_5, pc_in
 	stage_fetch		fetch(
 			.pc_in						(pc_out), 
 			.exec_pc_out				(execute_pc_out), 
-			.j_took_branch				(j_took_branch), 
+			.branched_jumped			(branched_jumped), 
 			.address_imem				(address_imem), 
 			.pc_upper_5					(pc_upper_5), 
 			.pc_out						(pc_in)
@@ -154,7 +154,7 @@ module processor(
 
 	
 	wire [31:0] insn_dx_in;
-	assign insn_dx_in = (j_took_branch | data_hazard ) ? 32'd0 : insn_fd_out;
+	assign insn_dx_in = (branched_jumped | data_hazard ) ? 32'd0 : insn_fd_out;
 	
 	latch_DX ldx(
 			.clock						(clock), 
@@ -189,7 +189,7 @@ module processor(
 			.b_out						(execute_b_out), 
 			.write_exception			(exec_write_exception), 
 			.pc_in						(execute_pc_out), 
-			.j_took_branch				(j_took_branch)
+			.branched_jumped			(branched_jumped)
 	);			
 	
 	

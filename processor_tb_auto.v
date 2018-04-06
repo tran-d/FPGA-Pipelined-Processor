@@ -82,11 +82,11 @@ module processor_tb_auto(
 	wire [31:0] insn_mw		= dut.my_processor.lmw.insn_in;
 
 	wire [4:0] opcode		= dut.my_processor.opcode;
-	wire [4:0] ALU_op 	     = dut.my_processor.execute.ec.ALU_op;
+	wire [4:0] ALU_op 	     = dut.my_processor.execute.ALU_op;
 	wire [31:0] alu_operandA = dut.my_processor.execute.ALU_operandA;
 	wire [31:0] alu_operandB = dut.my_processor.execute.ALU_operandB;
 	wire [31:0] alu_result = dut.my_processor.execute.o_out;
-	wire [31:0] exec_alu_operandB = dut.my_processor.execute.ec.ALU_operandB;
+	wire [31:0] exec_alu_operandB = dut.my_processor.execute.ALU_operandB;
 
 	wire [31:0] pc_in = dut.my_processor.pc_in;
 	wire [31:0] pc_out = dut.my_processor.pc_out;
@@ -200,8 +200,8 @@ module processor_tb_auto(
 		checkRegister(32'd1, 32'd3);
 		checkRegister(32'd2, 32'd3);
 		checkRegister(32'd3, 32'd6);
-		checkRegister(32'd7, -32'd99);
-		checkRegister(32'd8, 32'd666);
+		checkRegister(32'd7, 32'd0);
+		checkRegister(32'd8, 32'd0);
 		checkRegister(32'd9, 32'd999);
 	end endtask
 
