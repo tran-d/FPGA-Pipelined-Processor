@@ -2,8 +2,8 @@ module stage_decode(
 
 	insn_in,
 	ctrl_readRegA,
-	ctrl_readRegB);
-	
+	ctrl_readRegB
+);
 	
 	input [31:0] insn_in;
 	output [4:0] ctrl_readRegA, ctrl_readRegB;

@@ -1,6 +1,22 @@
-module stage_memory(insn, q_dmem, o_in, b_in, o_out, d_out, d_dmem, address_dmem, wren, wm_bypass, data_writeReg);
+module stage_memory(
 
-	input [31:0] insn, q_dmem;						//	q_mem: output of dmem (lw)
+	// inputs
+	insn_in, 
+	q_dmem, 
+	o_in, 
+	b_in, 
+	wm_bypass,
+	data_writeReg,
+	
+	// outputs
+	o_out, 
+	d_out, 
+	d_dmem, 
+	address_dmem, 
+	wren  
+);
+
+	input [31:0] insn_in, q_dmem;					//	q_mem: output of dmem (lw)
 	input [31:0] o_in, b_in;						//	ALU_result is used to address into dmem
 	input wm_bypass;									// WM BYPASSING
 	input [31:0] data_writeReg;
@@ -9,17 +25,15 @@ module stage_memory(insn, q_dmem, o_in, b_in, o_out, d_out, d_dmem, address_dmem
 	output [11:0] address_dmem;
 	output wren;
 	
-	
-	assign o_out = o_in;
-	assign d_out = q_dmem;
-	
-	assign address_dmem = o_in[11:0];
-	// WM BYPASSING 
-	assign d_dmem = wm_bypass ? data_writeReg : b_in;
-	
 	wire [4:0] opcode;
-	assign opcode 	= insn[31:27];
-	assign wren = ~opcode[4] && ~opcode[3] && opcode[2] && opcode[1] && opcode[0]; 		//sw
-
-
+	
+	assign opcode 			= insn_in[31:27];
+	assign wren 			= ~opcode[4] && ~opcode[3] && opcode[2] && opcode[1] && opcode[0]; 		//sw
+	assign o_out 			= o_in;
+	assign d_out 			= q_dmem;
+	assign address_dmem 	= o_in[11:0];
+	
+	/* WM BYPASSING */
+	assign d_dmem 			= wm_bypass ? data_writeReg : b_in;
+	
 endmodule

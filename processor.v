@@ -91,9 +91,6 @@ module processor(
 	input [31:0] data_readRegA, data_readRegB;
 
 	/* YOUR CODE STARTS HERE */
-
-	wire [4:0] opcode;
-	assign opcode = q_imem[31:27];
 	
 	/************************   Initialize Control Signals & Wires  ****************************/
 	
@@ -223,7 +220,7 @@ module processor(
 	
 	stage_memory memory(
 			// inputs
-			.insn							(insn_xm_out), 
+			.insn_in						(insn_xm_out), 
 			.q_dmem						(q_dmem), 
 			.o_in							(o_xm_out), 
 			.b_in							(b_xm_out), 
@@ -257,7 +254,7 @@ module processor(
 
 	stage_write writeback(
 			// inputs
-			.insn							(insn_mw_out), 
+			.insn_in						(insn_mw_out), 
 			.o_in							(o_mw_out), 
 			.d_in							(d_mw_out), 
 			.write_exception			(mw_write_exception), 			

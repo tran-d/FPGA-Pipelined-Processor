@@ -81,7 +81,7 @@ module processor_tb_auto(
 	wire [31:0] insn_xm		= dut.my_processor.lxm.insn_in;
 	wire [31:0] insn_mw		= dut.my_processor.lmw.insn_in;
 
-	wire [4:0] opcode		= dut.my_processor.opcode;
+	wire [4:0] opcode		= dut.my_processor.q_imem[31:27];
 	wire [4:0] ALU_op 	     = dut.my_processor.execute.ALU_op;
 	wire [31:0] alu_operandA = dut.my_processor.execute.ALU_operandA;
 	wire [31:0] alu_operandB = dut.my_processor.execute.ALU_operandB;

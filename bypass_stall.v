@@ -3,7 +3,7 @@ module bypass_stall(fd_insn, dx_insn, is_bypass_hazard);
 	input [31:0] fd_insn, dx_insn;
 	output is_bypass_hazard;
 	
-	wire [4:0] fd_rs1, fd_rs2, dx_rd, dx_opcode;
+	wire [4:0] fd_rs1, fd_rs2, dx_rd, dx_opcode, fd_rs1_equals_dx_rd, fd_rs2_equals_dx_rd;
 	wire dx_lw_insn;
 	
 	assign fd_rs1 	 	= fd_insn[21:17];
@@ -14,10 +14,6 @@ module bypass_stall(fd_insn, dx_insn, is_bypass_hazard);
 	
 	assign is_bypass_hazard = dx_lw_insn && (&fd_rs1_equals_dx_rd || &fd_rs2_equals_dx_rd); 							// && !fd_sw_insn;
 	
-	
-	/* Check Equality */
-	wire [4:0] fd_rs1_equals_dx_rd, fd_rs2_equals_dx_rd;
-
 	genvar i;
 	generate
 	for(i=0; i<5; i=i+1) begin: loop1

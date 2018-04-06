@@ -31,6 +31,7 @@ module stage_execute(
 	wire [31:0] ALU_operandA, ALU_operandB, ALU_result;
 	wire [4:0] ALU_op_new, shamt;
 	wire isNotEqual, isLessThan, exception;
+	
 	assign shamt = insn_in[11:7];
 		
 	alu my_alu(ALU_operandA, ALU_operandB, ALU_op_new, shamt, ALU_result, isNotEqual, isLessThan, exception);
@@ -47,9 +48,9 @@ module stage_execute(
 	
 	
 	/* ALU Controls */
-	wire r_insn, addi, add, sub, mul, div, ALU_add, ALU_sub, ALU_mul, ALU_div, immed_insn, bne, blt, bex, j, jr, jal, setx;
 	wire [31:0] immediate_extended;
 	wire [4:0] ALU_op_new_alt;
+	wire r_insn, addi, add, sub, mul, div, ALU_add, ALU_sub, ALU_mul, ALU_div, immed_insn, bne, blt, bex, j, jr, jal, setx;
 	
 	signextender_16to32 my_se(immediate, immediate_extended);
 	
@@ -98,17 +99,17 @@ module stage_execute(
 	assign take_blt		= blt && ~isLessThan && isNotEqual;  // rs > rd ---> rs 	notLT & NE rd
 	assign take_bex		= bex && isNotEqual;
 	
+	
 	/* PC Controls */ 
 	wire [31:0] pc_plus_1_plus_immediate, pc_in_alt1, pc_in_alt2;
 	wire dovf1, dne1, dlt1; // dummy vars
 	
 	adder32 my_adder32(pc_out, immediate_extended, 1'b0, pc_plus_1_plus_immediate, dovf1, dne1, dlt1); // don't need a carry-in for some reason...
 	
-	assign pc_in			= (j | jal | take_bex) 	? {pc_upper_5, target} 		:  pc_in_alt1; 		// PC = T, 				j/jal/take_bex
-	assign pc_in_alt1 	= (take_bne | take_blt) ? pc_plus_1_plus_immediate :	pc_in_alt2; 		// PC = PC + 1 + N, 	take_bne/take_blt
-	assign pc_in_alt2		= jr 							? regfile_operandB			: 	32'd0;				// PC = $rd				jr, else PC = (PC + 1) or (0)
-	
-	assign branched_jumped = j | jal | take_bex | take_blt | take_bne | jr;
+	assign pc_in				= (j | jal | take_bex) 	? {pc_upper_5, target} 		:  pc_in_alt1; 		// PC = T, 				j/jal/take_bex
+	assign pc_in_alt1 		= (take_bne | take_blt) ? pc_plus_1_plus_immediate :	pc_in_alt2; 		// PC = PC + 1 + N, 	take_bne/take_blt
+	assign pc_in_alt2			= jr 							? regfile_operandB			: 	32'd0;				// PC = $rd				jr, else PC = (PC + 1) or (0)
+	assign branched_jumped 	= j | jal | take_bex | take_blt | take_bne | jr;
 	
 	
 	/* LATCH Controls */ 
