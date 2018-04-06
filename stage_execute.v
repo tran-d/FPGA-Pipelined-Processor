@@ -1,7 +1,7 @@
 module stage_execute(
 
 	// inputs
-	insn,
+	insn_in,
 	regfile_operandA,
 	regfile_operandB,
 	pc_upper_5,
@@ -22,7 +22,7 @@ module stage_execute(
 );
 
 	input [4:0] pc_upper_5;
-	input [31:0] insn, regfile_operandA, regfile_operandB, pc_out, o_xm_out, data_writeReg;
+	input [31:0] insn_in, regfile_operandA, regfile_operandB, pc_out, o_xm_out, data_writeReg;
 	input mx_bypass_A, wx_bypass_A, mx_bypass_B, wx_bypass_B;  
 	
 	output [31:0] pc_in, o_out, b_out;
@@ -30,8 +30,8 @@ module stage_execute(
 	
 	wire [31:0] ALU_operandA, ALU_operandB, ALU_result;
 	wire [4:0] ALU_op_new, shamt;
-	wire take_branch, isNotEqual, isLessThan, exception;
-	assign shamt = insn[11:7];
+	wire isNotEqual, isLessThan, exception;
+	assign shamt = insn_in[11:7];
 		
 	alu my_alu(ALU_operandA, ALU_operandB, ALU_op_new, shamt, ALU_result, isNotEqual, isLessThan, exception);
 
@@ -40,10 +40,10 @@ module stage_execute(
 	wire [16:0] immediate;
 	wire [26:0] target;
 	
-	assign opcode 		= insn[31:27];
-	assign ALU_op 		= insn[6:2];
-	assign immediate 	= insn[16:0];
-	assign target 		= insn[26:0];
+	assign opcode 		= insn_in[31:27];
+	assign ALU_op 		= insn_in[6:2];
+	assign immediate 	= insn_in[16:0];
+	assign target 		= insn_in[26:0];
 	
 	
 	/* ALU Controls */
@@ -97,8 +97,6 @@ module stage_execute(
 	assign take_bne 		= bne && isNotEqual;
 	assign take_blt		= blt && ~isLessThan && isNotEqual;  // rs > rd ---> rs 	notLT & NE rd
 	assign take_bex		= bex && isNotEqual;
-	assign take_branch 	= take_bne || take_blt || take_bex;
-	
 	
 	/* PC Controls */ 
 	wire [31:0] pc_plus_1_plus_immediate, pc_in_alt1, pc_in_alt2;

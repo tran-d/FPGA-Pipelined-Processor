@@ -93,7 +93,7 @@ module processor(
 	/* YOUR CODE STARTS HERE */
 
 	wire [4:0] opcode;
-	assign opcode 		= q_imem[31:27];
+	assign opcode = q_imem[31:27];
 	
 	/************************   Initialize Control Signals & Wires  ****************************/
 	
@@ -103,41 +103,49 @@ module processor(
 	wire [31:0] insn_fd_out, insn_dx_out, insn_mw_out, insn_xm_out;
 	wire [31:0] a_dx_out, b_dx_out, o_xm_out, b_xm_out, o_mw_out, d_mw_out;
 	wire [31:0] execute_b_out, execute_o_out, memory_o_out, memory_d_out;
-	wire [31:0] insn_fd_in;
+	wire [31:0] insn_fd_in, insn_dx_in;
 	
 	wire exec_write_exception, xm_write_exception, mw_write_exception;
-	wire data_hazard, branched_jumped;
+	wire is_bypass_hazard, branched_jumped;
 	wire mx_bypass_A, mx_bypass_B, wx_bypass_A, wx_bypass_B, wm_bypass;
 
 	assign nop = 32'd0;
-	assign insn_fd_in = branched_jumped ? nop : q_imem;
+	
+	/* flushing */
+	assign insn_fd_in = branched_jumped 								? nop : q_imem;
+	assign insn_dx_in = (branched_jumped | is_bypass_hazard ) 	? nop	: insn_fd_out;
 	
 	
 	/******************************* Initialize Pipelines **********************************/
 	
 	latch_PC lpc(
+			// inputs
 			.clock 						(clock), 
 			.reset 						(reset), 
-			.enable 						(~data_hazard), 
+			.enable 						(~is_bypass_hazard), 
 			.pc_in						(pc_in), 
+			
+			// outputs
 			.pc_out						(pc_out)
 	);
 	
-	//pc_out, execute_pc_out, branched_jumped, address_imem, pc_upper_5, pc_in
 	stage_fetch		fetch(
+			// inputs
 			.pc_in						(pc_out), 
-			.exec_pc_out				(execute_pc_out), 
+			.execute_pc_out			(execute_pc_out), 
 			.branched_jumped			(branched_jumped), 
-			.address_imem				(address_imem), 
-			.pc_upper_5					(pc_upper_5), 
-			.pc_out						(pc_in)
+			
+			// outputs
+			.pc_out						(pc_in),
+			.pc_upper_5					(pc_upper_5),
+			.address_imem				(address_imem)
 	);
 	
 	latch_FD		lfd(
 			// inputs
 			.clock						(clock),
 			.reset						(reset), 
-			.enable						(~data_hazard), 
+			.enable						(~is_bypass_hazard), 
 			.pc_in						(pc_out),
 			.insn_in						(insn_fd_in),
 			
@@ -147,32 +155,34 @@ module processor(
 	);
 	
 	stage_decode	decode(
-			.insn 						(insn_fd_out), 
+			// inputs
+			.insn_in						(insn_fd_out), 
 			.ctrl_readRegA				(ctrl_readRegA), 
 			.ctrl_readRegB 			(ctrl_readRegB)
-	); 
-
-	
-	wire [31:0] insn_dx_in;
-	assign insn_dx_in = (branched_jumped | data_hazard ) ? 32'd0 : insn_fd_out;
+			
+			// outputs already in top-level
+	);
 	
 	latch_DX ldx(
+			// inputs
 			.clock						(clock), 
 			.reset 						(reset), 
 			.enable						(1'b1), 
 			.pc_in 						(pc_fd_out), 
-			.pc_out						(pc_dx_out),
 			.insn_in						(insn_dx_in),	
-			.insn_out					(insn_dx_out), 
 			.a_in							(data_readRegA), 
 			.b_in							(data_readRegB), 
+			
+			// outputs
+			.pc_out						(pc_dx_out),
+			.insn_out					(insn_dx_out), 
 			.a_out						(a_dx_out), 
 			.b_out						(b_dx_out)
 	);
 	
 	stage_execute execute(
 			// inputs
-			.insn							(insn_dx_out), 
+			.insn_in						(insn_dx_out), 
 			.regfile_operandA			(a_dx_out), 
 			.regfile_operandB			(b_dx_out), 
 			.pc_upper_5					(pc_upper_5), 
@@ -256,13 +266,32 @@ module processor(
 			.data_writeReg				(data_writeReg), 
 			.ctrl_writeReg				(ctrl_writeReg), 
 			.ctrl_writeEnable			(ctrl_writeEnable)
-	);		
+	);
 	
+	bypass 	my_bypass(
+			// inputs 
+			.fd_insn						(insn_fd_out), 
+			.dx_insn						(insn_dx_out), 
+			.xm_insn						(insn_xm_out), 
+			.mw_insn						(insn_mw_out),
+		
+			// outputs
+			.mx_bypass_A				(mx_bypass_A), 
+			.mx_bypass_B				(mx_bypass_B), 
+			.wx_bypass_A				(wx_bypass_A), 
+			.wx_bypass_B				(wx_bypass_B), 
+			.wm_bypass					(wm_bypass)
+	);
 	
-	/* Stalling & Bypassing */
 	//data_hazard_control dhc(insn_fd_out, insn_dx_out, insn_xm_out, data_hazard);
-	bypass_stall 	bs(insn_fd_out, insn_dx_out, data_hazard);
-	bypass 			 b(insn_fd_out, insn_dx_out, insn_xm_out, insn_mw_out, mx_bypass_A, mx_bypass_B, wx_bypass_A, wx_bypass_B, wm_bypass);
+	bypass_stall 	my_bypass_stall(
+			// inputs
+			.fd_insn						(insn_fd_out), 
+			.dx_insn						(insn_dx_out), 
+			
+			// outputs
+			.is_bypass_hazard			(is_bypass_hazard)
+	);
 	
 
 endmodule
