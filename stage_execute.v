@@ -14,7 +14,6 @@ module stage_execute(
 	// outputs
 	o_out,
 	b_out,
-	take_branch,
 	write_exception,
 	pc_in,
 	j_took_branch);
@@ -26,14 +25,14 @@ module stage_execute(
 	input [31:0] o_xm_out, data_writeReg;
 	
 	output [31:0] o_out, b_out;
-	output take_branch, write_exception, j_took_branch; // might need this
+	output write_exception, j_took_branch; // might need this
 	output [31:0] pc_in;
 
 	wire isNotEqual, isLessThan, exception;
 	
 	wire [31:0] ALU_operandA, ALU_operandB, ALU_result;
 	wire [4:0] mux_ALU_op, shamt;
-	
+	wire take_branch;
 	
 	assign shamt = insn[11:7];
 		

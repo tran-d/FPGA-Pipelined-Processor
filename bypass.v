@@ -3,11 +3,10 @@ module bypass(fd_insn, dx_insn, xm_insn, mw_insn, mx_bypass_A, mx_bypass_B, wx_b
 	input [31:0] fd_insn, dx_insn, xm_insn, mw_insn;
 	output mx_bypass_A, mx_bypass_B, wx_bypass_A, wx_bypass_B, wm_bypass;
 	
-	wire [4:0] fd_opcode, dx_opcode, xm_opcode, mw_opcode, dx_ALU_opcode;
-	wire [4:0] fd_rs1, fd_rs2, fd_rd, dx_rd, dx_rs1, dx_rs2, xm_rd, xm_rs1, xm_rs2, mw_rd, mw_rs1, mw_rs2;
+	wire [4:0] dx_opcode, xm_opcode, mw_opcode, dx_ALU_opcode;
+	wire [4:0] fd_rs1, fd_rs2, fd_rd, dx_rd, dx_rs1, dx_rs2, xm_rd, xm_rs1, xm_rs2, mw_rd, mw_rs1;
 	wire [4:0] r30, r31;
 	
-	assign fd_opcode	= fd_insn[31:27];
 	assign dx_opcode 	= dx_insn[31:27];
 	assign xm_opcode 	= xm_insn[31:27];
 	assign mw_opcode 	= mw_insn[31:27];
@@ -27,7 +26,6 @@ module bypass(fd_insn, dx_insn, xm_insn, mw_insn, mx_bypass_A, mx_bypass_B, wx_b
 	assign xm_rd 		= xm_insn[26:22];
 	
 	assign mw_rs1 	 	= mw_insn[21:17];
-	assign mw_rs2		= mw_insn[16:12];
 	assign mw_rd 		= mw_insn[26:22];
 	
 	assign r30 = 5'd30;
