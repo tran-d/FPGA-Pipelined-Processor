@@ -121,3 +121,20 @@ module reg32_neg(in, clock, reset, writeEnable, out);
 		endgenerate	
 endmodule
 
+
+module reg64(in, clock, reset, writeEnable, out);
+
+		input clock, writeEnable, reset;
+		input [63:0] in;
+		output [63:0] out;
+
+		genvar i;
+		generate
+			for (i = 0; i < 64; i = i + 1) begin: loop1
+				dflipflop mydffe(in[i], clock, reset, writeEnable, out[i]);
+			end
+		endgenerate	
+endmodule
+
+
+

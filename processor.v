@@ -58,7 +58,7 @@ module processor(
 
     // Dmem
     address_dmem,                   // O: The address of the data to get or put from/to dmem
-    d_dmem,                           // O: The data to write to dmem
+    d_dmem,                         // O: The data to write to dmem
     wren,                           // O: Write enable for dmem
     q_dmem,                         // I: The data from dmem
 
@@ -69,113 +69,251 @@ module processor(
     ctrl_readRegB,                  // O: Register to read from port B of regfile
     data_writeReg,                  // O: Data to write to for regfile
     data_readRegA,                  // I: Data from port A of regfile
-    data_readRegB                   // I: Data from port B of regfile
+    data_readRegB,                  // I: Data from port B of regfile
+	 
+	 // LED Array
+	 led_commands,							// O: Data to write to LED array
+	 
+	 // Capacitive Sensor Array
+	 capacitive_sensor_readings		// I: Data being read from sensor array
 );
+
 	// Control signals
 	input clock, reset;
 
 	// Imem
-	output [11:0] address_imem;      /*no driver*/
+	output [11:0] address_imem;      
 	input [31:0] q_imem;
 
 	// Dmem
-	output [11:0] address_dmem;		/*no driver*/
-	output [31:0] d_dmem;					/*no driver*/
+	output [11:0] address_dmem;		
+	output [31:0] d_dmem;				
 	output wren;
 	input [31:0] q_dmem;
 
 	// Regfile
 	output ctrl_writeEnable;
 	output [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
-	output [31:0] data_writeReg;		/*no driver*/
+	output [31:0] data_writeReg;
 	input [31:0] data_readRegA, data_readRegB;
+	
+	// LED Array
+	output [143:0] led_commands;
+	
+	// Capacitive Sensor Array
+	input [287:0] capacitive_sensor_readings;
 
 	/* YOUR CODE STARTS HERE */
-
-	wire [4:0] opcode;
-//	wire [4:0] rd, rs, rt, shamt, ALU_op;
-//	wire [16:0] immediate;
-//	wire [26:0] target;
-//	
-	assign opcode 		= q_imem[31:27];
-//	assign rd 			= q_imem[26:22];
-//	assign rs 			= q_imem[21:17];
-//	assign rt 			= q_imem[16:12];
-//	assign shamt 		= q_imem[11:7];
-//	assign ALU_op 		= q_imem[6:2];
-//	assign immediate 	= q_imem[16:0];
-//	assign target 		= q_imem[26:0];
 	
 	/************************   Initialize Control Signals & Wires  ****************************/
 	
-	/* Control Signals */
-	wire br, DMwe, ALUinB, Rwd, j, jr, jal;
-	
-	/* ALU wires */
+	wire [4:0]  pc_upper_5;
+	wire [31:0] pc_in, pc_out, execute_pc_out, pc_fd_out, pc_dx_out;
+	wire [31:0] nop, multdiv_result;
+	wire [31:0] insn_fd_out, insn_dx_out, insn_mw_out, insn_xm_out;
+	wire [31:0] a_dx_out, b_dx_out, o_xm_out, b_xm_out, o_mw_out, d_mw_out;
 	wire [31:0] execute_b_out, execute_o_out, memory_o_out, memory_d_out;
-	wire take_branch, overflow;
+	wire [31:0] insn_fd_in, insn_dx_in;
 	
-	/* PC wire */
-	wire [31:0] pc_in, pc_out, exec_pc_out;
-	wire [4:0] pc_upper_5;
-	wire enable_pc, enable_fd, enable_dx, enable_xm, enable_mw, j_took_branch;
+	wire exec_write_exception, xm_write_exception, mw_write_exception;
+	wire is_bypass_hazard, branched_jumped, multdiv_RDY;
+	wire mx_bypass_A, mx_bypass_B, wx_bypass_A, wx_bypass_B, wm_bypass;
 	
-	wire [31:0] data_writeStatusReg;
+    wire latch_ena;
+	assign nop = 32'd0;
+	
+	/* flushing */
+	assign insn_fd_in = branched_jumped 								? nop : q_imem;
+	assign insn_dx_in = (branched_jumped | is_bypass_hazard ) 	? nop	: insn_fd_out;
 	
 	
 	/******************************* Initialize Pipelines **********************************/
-	// assign enable_pc = 1'b1;
-	// assign enable_fd = 1'b1;
-	assign enable_dx = 1'b1;
-	assign enable_xm = 1'b1;
-	assign enable_mw = 1'b1;
 	
-	wire [31:0] pc_fd_out, pc_dx_out;
-	wire [31:0] insn_fd_out, insn_dx_out, insn_mw_out, insn_xm_out;
-	wire [31:0] a_dx_out, b_dx_out, o_xm_out, b_xm_out, o_mw_out, d_mw_out;
-	wire exec_write_exception, xm_write_exception, mw_write_exception;
-	wire data_hazard;
+	latch_PC lpc(
+			// inputs
+			.clock 						(clock), 
+			.reset 						(reset), 
+			.enable 						(~is_bypass_hazard), 
+			.pc_in						(pc_in), 
+			
+			// outputs
+			.pc_out						(pc_out)
+	);
 	
-	//assign pc_in = take_branch
-	latch_PC 		lpc(clock, reset, ~data_hazard, pc_in, pc_out);
+	stage_fetch		fetch(
+			// inputs
+			.pc_in						(pc_out), 
+			.execute_pc_out			(execute_pc_out), 
+			.branched_jumped			(branched_jumped), 
+			
+			// outputs
+			.pc_out						(pc_in),
+			.pc_upper_5					(pc_upper_5),
+			.address_imem				(address_imem)
+	);
+	
+	latch_FD		lfd(
+			// inputs
+			.clock						(clock),
+			.reset						(reset), 
+			.enable						(~is_bypass_hazard), 
+			.pc_in						(pc_out),
+			.insn_in						(insn_fd_in),
+			
+			// outputs
+			.pc_out						(pc_fd_out), 
+			.insn_out					(insn_fd_out)
+	);
+	
+	stage_decode	decode(
+			// inputs
+			.insn_in						(insn_fd_out), 
+			.ctrl_readRegA				(ctrl_readRegA), 
+			.ctrl_readRegB 			(ctrl_readRegB)
+			
+			// outputs already in top-level
+	);
+	
+	latch_DX ldx(
+			// inputs
+			.clock						(clock), 
+			.reset 						(reset), 
+			.enable						(latch_ena), 
+			.pc_in 						(pc_fd_out), 
+			.insn_in						(insn_dx_in),	
+			.a_in							(data_readRegA), 
+			.b_in							(data_readRegB), 
+			
+			// outputs
+			.pc_out						(pc_dx_out),
+			.insn_out					(insn_dx_out), 
+			.a_out						(a_dx_out), 
+			.b_out						(b_dx_out)
+	);
+	
+	stage_execute execute(
+			// inputs
+			.clock						(clock),
+			.insn_in						(insn_dx_out), 
+			.regfile_operandA			(a_dx_out), 
+			.regfile_operandB			(b_dx_out), 
+			.pc_upper_5					(pc_upper_5), 
+			.pc_out						(pc_dx_out), 
+			.mx_bypass_A				(mx_bypass_A), 
+			.wx_bypass_A				(wx_bypass_A),  
+			.mx_bypass_B				(mx_bypass_B), 
+			.wx_bypass_B				(wx_bypass_B),	
+			.o_xm_out					(o_xm_out),			// O value from XM latch output
+			.data_writeReg				(data_writeReg),	
+			.sensor_readings 			(capacitive_sensor_readings),
+			
+			// outputs
+			.o_out						(execute_o_out), 
+			.b_out						(execute_b_out), 
+			.multdiv_result			(multdiv_result),
+			.write_exception			(exec_write_exception), 
+			.pc_in						(execute_pc_out), 
+			.branched_jumped			(branched_jumped),
+			.multdiv_RDY				(multdiv_RDY),
+			.led_commands				(led_commands)
+);			
 	
 	
-	stage_fetch    fetch(pc_out, exec_pc_out, j_took_branch, address_imem, pc_upper_5, pc_in);
+	latch_XM lxm(
+			// inputs
+			.clock						(clock), 
+			.reset						(reset), 
+			.enable						(latch_ena), 
+			.insn_in						(insn_dx_out),
+			.o_in							(execute_o_out), 
+			.b_in							(execute_b_out), 	
+			.write_exception_in		(exec_write_exception), 
+			
+			// outputs
+			.insn_out					(insn_xm_out), 
+			.o_out						(o_xm_out), 
+			.b_out						(b_xm_out),
+			.write_exception_out		(xm_write_exception)
+			
+	);
+	
+	stage_memory memory(
+			// inputs
+			.clock						(clock),
+			.insn_in						(insn_xm_out), 
+			.q_dmem						(q_dmem), 
+			.o_in							(o_xm_out), 
+			.b_in							(b_xm_out), 
+			.wm_bypass					(wm_bypass), 
+			.data_writeReg				(data_writeReg),
+			
+			// outputs
+			.d_dmem						(d_dmem), 
+			.o_out						(memory_o_out), 
+			.d_out						(memory_d_out), 
+			.address_dmem				(address_dmem), 
+			.wren							(wren)
+	);
 
-	wire [31:0] insn_fd_in;
-	assign insn_fd_in = j_took_branch ? 32'd0 : q_imem;
-	
-	latch_FD			lfd(clock, reset, ~data_hazard, pc_out, insn_fd_in, pc_fd_out, insn_fd_out);
-	
-	stage_decode	decode(insn_fd_out, ctrl_readRegA, ctrl_readRegB); 
+	latch_MW lmw(
+			// inputs
+			.clock						(clock), 
+			.reset						(reset), 
+			.enable						(latch_ena), 
+			.insn_in						(insn_xm_out), 
+			.o_in							(memory_o_out), 
+			.d_in							(memory_d_out), 
+			.write_exception_in		(xm_write_exception), 
+			 
+			// outputs
+			.insn_out					(insn_mw_out), 
+			.o_out						(o_mw_out), 
+			.d_out						(d_mw_out),
+			.write_exception_out		(mw_write_exception)
+	);
 
+	stage_write writeback(
+			// inputs
+			.insn_in						(insn_mw_out), 
+			.o_in							(o_mw_out), 
+			.d_in							(d_mw_out),
+			.multdiv_result			(multdiv_result),
+			.multdiv_RDY				(multdiv_RDY),
+			.write_exception			(mw_write_exception), 			
+			
+			// outputs			
+			.data_writeReg				(data_writeReg), 
+			.ctrl_writeReg				(ctrl_writeReg), 
+			.ctrl_writeEnable			(ctrl_writeEnable)
+	);
 	
-	wire [31:0] insn_dx_in;
-	wire [31:0] pc_dx_out1;
-	assign insn_dx_in = (j_took_branch | data_hazard ) ? 32'd0 : insn_fd_out;
-	latch_DX			ldx(clock, reset, enable_dx, pc_fd_out, insn_dx_in, pc_dx_out, insn_dx_out, data_readRegA, data_readRegB, a_dx_out, b_dx_out);
-
+	bypass 	my_bypass(
+			// inputs 
+			.fd_insn						(insn_fd_out), 
+			.dx_insn						(insn_dx_out), 
+			.xm_insn						(insn_xm_out), 
+			.mw_insn						(insn_mw_out),
+		
+			// outputs
+			.mx_bypass_A				(mx_bypass_A), 
+			.mx_bypass_B				(mx_bypass_B), 
+			.wx_bypass_A				(wx_bypass_A), 
+			.wx_bypass_B				(wx_bypass_B), 
+			.wm_bypass					(wm_bypass)
+	);
 	
-	stage_execute	execute(insn_dx_out, a_dx_out, b_dx_out, pc_upper_5, pc_dx_out, 		// inputs
-								execute_o_out, execute_b_out, take_branch, exec_write_exception, exec_pc_out, j_took_branch);			// outputs
+	//data_hazard_control dhc(insn_fd_out, insn_dx_out, insn_xm_out, data_hazard);
+	bypass_stall 	my_bypass_stall(
+			// inputs
+			.clock						(clock),
+			.fd_insn						(insn_fd_out), 
+			.dx_insn						(insn_dx_out),
+			.writeback_insn			(insn_mw_out),
+			.multdiv_RDY				(multdiv_RDY),
+			
+			// outputs
+			.is_bypass_hazard			(is_bypass_hazard),
+            .latch_ena              (latch_ena)
+	);
 	
-
-	latch_XM       lxm(clock, reset, enable_xm, exec_write_exception, xm_write_exception, insn_dx_out, insn_xm_out, execute_o_out, execute_b_out, o_xm_out, b_xm_out);
-	
-
-	stage_memory   memory(insn_xm_out, q_dmem, o_xm_out, b_xm_out, memory_o_out, memory_d_out, d_dmem, address_dmem, wren);
-
-	
-	latch_MW       lmw(clock, reset, enable_mw, xm_write_exception, mw_write_exception, insn_xm_out, insn_mw_out, memory_o_out, memory_d_out, o_mw_out, d_mw_out);
-
-
-	stage_write		writeback(insn_mw_out, o_mw_out, d_mw_out, mw_write_exception, 			// inputs
-									data_writeReg, ctrl_writeReg, ctrl_writeEnable);		// outputs
-	
-	
-	/* Data Hazards */
-	data_hazard_control dhc(insn_fd_out, insn_dx_out, insn_xm_out, data_hazard);
-	
-	
-
 endmodule

@@ -8,7 +8,7 @@ module multdiv_tb();
 
     // outputs from the multdiv are wire type
     wire signed [31:0] data_result;
-    wire data_resultRDY, data_exception;
+    wire data_resultRDY, data_exception, in_progress;
 	 
 	 /* FOR TESTING */
 	 /*wire [64:0] product;
@@ -18,20 +18,30 @@ module multdiv_tb();
 	 wire [63:0] RQB;
 	 wire RQB_lt_Divisor;
 	 wire [5:0] counter_bitsD;*/
+	 
 
     // Tracking the number of errors
     integer errors;
     integer index;    // for testing...
 
     // Instantiate multdiv
-    multdiv multdiv_ut(data_operandA, data_operandB, ctrl_MULT, ctrl_DIV, clock, data_result, data_exception, data_resultRDY);
-
+    multdiv multdiv_ut(data_operandA, data_operandB, ctrl_MULT, ctrl_DIV, clock, data_result, data_exception, data_resultRDY, in_progress);
+	
+	 wire div_RDY = multdiv_ut.div_RDY;
+	 wire mult_RDY = multdiv_ut.mult_RDY;
+	 wire pseudo_RDY = multdiv_ut.data_resultRDY;
+	
     initial
 
     begin
         $display($time, "<< Starting the Simulation >>");
         clock = 1'b0;    // at time 0
         errors = 0;
+        
+        //$monitor("clock: %d, pseudo_RDY: %d, ctrl_DIV: %d, div_RDY: %d, data_resultRDY: %d data_result: %d", clock, pseudo_RDY, ctrl_DIV, div_RDY, data_resultRDY, data_result);
+		  
+		  $monitor("clock: %d, pseudo_RDY: %d, ctrl_MULT: %d, mult_RDY: %d, data_resultRDY: %d data_result: %d", clock, pseudo_RDY, ctrl_MULT, mult_RDY, data_resultRDY, data_result);
+		  
 		  
 //		  $monitor("time $d, clock: %b, ctrl_DIV: %b, A: %h, B: %h, quotient: %b %b, \n\n\t RQB_lt_Divisor: %b, adder_resultD: %b, data_exception: %b, data_resultRDY: %b counterD: %b\n\n", 
 //					$time, clock, ctrl_DIV, data_operandA, data_operandB, RQB[63:32], RQB[31:0], RQB_lt_Divisor, adder_resultD, data_exception, data_resultRDY, counter_bitsD);
@@ -40,6 +50,13 @@ module multdiv_tb();
 //					clock, ctrl_DIV, data_operandA, data_operandB, RQB[63:32], RQB[31:0], RQB_lt_Divisor, data_exception, data_resultRDY, counter_bitsD);
 		  
 		  
+           $display("initialization");
+        @(negedge clock);
+        assign data_operandA = 32'd13001;
+        assign data_operandB = 32'd18064;
+        assign ctrl_MULT = 1'b0;
+        assign ctrl_DIV = 1'b0;
+          
 		  // MULTIPLICATION
 		  $display($time, "<< MULTIPLICATION >>");
 
@@ -713,38 +730,17 @@ module multdiv_tb();
         else begin
             $display("test 19: PASS");
         end
-
-        if(errors == 0) begin
-            $display("The simulation completed without errors");
-        end
-        else begin
-            $display("The simulation failed with %d errors", errors);
-        end
 		  
 		  
-		  /*$display("test 19b: starting (division interrupting multiplication)");
-        $display("test 1a: starting (large multiplication)");
+		 //////////////////////////////////////////////////
+		  
+		  $display("test CUSTOM_1a: 2435 / 5 = 487 ");
         @(negedge clock);
-        assign data_operandA = 32'd13001;
-        assign data_operandB = 32'd18064;
-        assign ctrl_MULT = 1'b1;
-        assign ctrl_DIV = 1'b0;
-        assign data_expected = 32'd234850064;
-        assign data_exception_expected = 1'b0;
-
-        @(negedge clock);
-        assign ctrl_MULT = 1'b0;
-		  
-		   @(posedge clock);
-        @(posedge clock);
-		  
-		  $display("test 16: starting (large division, not exactly divisible)");
-        @(negedge clock);
-        assign data_operandA = 32'd293435;
-        assign data_operandB = 32'd17;
+        assign data_operandA = 32'd2435;
+        assign data_operandB = 32'd5;
         assign ctrl_MULT = 1'b0;
         assign ctrl_DIV = 1'b1;
-        assign data_expected = 32'd17260;
+        assign data_expected = 32'd487;
         assign data_exception_expected = 1'b0;
 
         @(negedge clock);
@@ -752,15 +748,120 @@ module multdiv_tb();
 
         @(posedge data_resultRDY);
         @(posedge clock);
-
-        $display("test 19b: done");
+        $display("test 1a: done");
         if(data_result !== data_expected || data_exception !== data_exception_expected) begin
-            $display("**test 19b: FAIL; expected: %h, actual: %h; `data_exception` expected: %b, actual: %b", data_expected, data_result, data_exception_expected, data_exception);
+            $display("**test 1a: FAIL; expected: %d, actual: %d; `data_exception` expected: %b, actual: %b", data_expected, data_result, data_exception_expected, data_exception);
             errors = errors + 1;
         end
         else begin
-            $display("test 19b: PASS");
-        end*/
+            $display("test 1a: PASS");
+        end
+		  
+		  $display("test CUSTOM_1a: 2435 / -5 = -487");
+        @(negedge clock);
+        assign data_operandA = 32'd2435;
+        assign data_operandB = -32'd5;
+        assign ctrl_MULT = 1'b0;
+        assign ctrl_DIV = 1'b1;
+        assign data_expected = -32'd487;
+        assign data_exception_expected = 1'b0;
+
+        @(negedge clock);
+        assign ctrl_DIV = 1'b0;
+
+        @(posedge data_resultRDY);
+        @(posedge clock);
+        $display("test 1ba: done");
+        if(data_result !== data_expected || data_exception !== data_exception_expected) begin
+            $display("**test 1b: FAIL; expected: %d, actual: %d; `data_exception` expected: %b, actual: %b", data_expected, data_result, data_exception_expected, data_exception);
+            errors = errors + 1;
+        end
+        else begin
+            $display("test 1b: PASS");
+        end
+		  
+		  $display("test CUSTOM_1c: 2430 / 5 = 486");
+        @(negedge clock);
+        assign data_operandA = 32'd2430;
+        assign data_operandB = 32'd5;
+        assign ctrl_MULT = 1'b0;
+        assign ctrl_DIV = 1'b1;
+        assign data_expected = 32'd486;
+        assign data_exception_expected = 1'b0;
+
+        @(negedge clock);
+        assign ctrl_DIV = 1'b0;
+
+        @(posedge data_resultRDY);
+        @(posedge clock);
+        $display("test 1c: done");
+        if(data_result !== data_expected || data_exception !== data_exception_expected) begin
+            $display("**test 1c: FAIL; expected: %d, actual: %d; `data_exception` expected: %b, actual: %b", data_expected, data_result, data_exception_expected, data_exception);
+            errors = errors + 1;
+        end
+        else begin
+            $display("test 1c: PASS");
+        end
+		  
+		  $display("test CUSTOM_1d: 2430 / -5 = -486");
+        @(negedge clock);
+        assign data_operandA = 32'd2430;
+        assign data_operandB = -32'd5;
+        assign ctrl_MULT = 1'b0;
+        assign ctrl_DIV = 1'b1;
+        assign data_expected = -32'd486;
+        assign data_exception_expected = 1'b0;
+
+        @(negedge clock);
+        assign ctrl_DIV = 1'b0;
+
+        @(posedge data_resultRDY);
+        @(posedge clock);
+        $display("test 1d: done");
+        if(data_result !== data_expected || data_exception !== data_exception_expected) begin
+            $display("**test 1d: FAIL; expected: %d, actual: %d; `data_exception` expected: %b, actual: %b", data_expected, data_result, data_exception_expected, data_exception);
+            errors = errors + 1;
+        end
+        else begin
+            $display("test 1d: PASS");
+        end
+		  
+		  if(errors == 0) begin
+            $display("The simulation completed without errors");
+        end
+        else begin
+            $display("The simulation failed with %d errors", errors);
+        end
+		  
+		  $display("test CUSTOM_1e: 0 / 0 = 0");
+        @(negedge clock);
+        assign data_operandA = 32'd0;
+        assign data_operandB = 32'd0;
+        assign ctrl_MULT = 1'b0;
+        assign ctrl_DIV = 1'b1;
+        assign data_expected = 32'd0;
+        assign data_exception_expected = 1'b0;
+
+        @(negedge clock);
+        assign ctrl_DIV = 1'b0;
+
+        @(posedge data_resultRDY);
+        @(posedge clock);
+        $display("test 1d: done");
+        if(data_result !== data_expected || data_exception !== data_exception_expected) begin
+            $display("**test 1e: FAIL; expected: %d, actual: %d; `data_exception` expected: %b, actual: %b", data_expected, data_result, data_exception_expected, data_exception);
+            errors = errors + 1;
+        end
+        else begin
+            $display("test 1e: PASS");
+        end
+		  
+		  if(errors == 0) begin
+            $display("The simulation completed without errors");
+        end
+        else begin
+            $display("The simulation failed with %d errors", errors);
+        end
 		  
 
         $stop;
